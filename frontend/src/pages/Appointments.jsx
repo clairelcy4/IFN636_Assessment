@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import axiosInstance from '../axiosConfig';
-import TaskForm from '../components/TaskForm';
-import TaskList from '../components/TaskList';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+import axiosInstance from "../axiosConfig";
+import TaskForm from "../components/TaskForm";
+import TaskList from "../components/TaskList";
+import { useAuth } from "../context/AuthContext";
 
-const Tasks = () => {
+const Appointments = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
@@ -12,12 +12,12 @@ const Tasks = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axiosInstance.get('/api/tasks', {
+        const response = await axiosInstance.get("/api/tasks", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setTasks(response.data);
       } catch (error) {
-        alert('Failed to fetch tasks.');
+        alert("Failed to fetch tasks.");
       }
     };
 
@@ -32,9 +32,13 @@ const Tasks = () => {
         editingTask={editingTask}
         setEditingTask={setEditingTask}
       />
-      <TaskList tasks={tasks} setTasks={setTasks} setEditingTask={setEditingTask} />
+      <TaskList
+        tasks={tasks}
+        setTasks={setTasks}
+        setEditingTask={setEditingTask}
+      />
     </div>
   );
 };
 
-export default Tasks;
+export default Appointments;

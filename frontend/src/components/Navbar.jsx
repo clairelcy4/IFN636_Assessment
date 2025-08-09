@@ -24,14 +24,14 @@ const Navbar = () => {
       <div>
         {user ? (
           <>
-            <Link to="/tasks" className="mr-4">
+            <Link to="/pet" className="mr-4">
               Pet Profiles
             </Link>{" "}
-            <Link to="/tasks" className="mr-4">
+            <Link to="/appointment" className="mr-4">
               Appointments
             </Link>{" "}
             {/* vet profiles are included in appointment*/}
-            <Link to="/tasks" className="mr-4">
+            <Link to="/treatment" className="mr-4">
               Treatment Records
             </Link>
             <Link to="/profile" className="mr-4">
