@@ -7,13 +7,17 @@ const Treatment = () => {
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [formData, setFormData] = useState({
-    appointedBy: "",
     petName: "",
     vetName: "",
-    appointDate: "",
-    duration: "",
-    status: "",
-    reason: "",
+    nurseName: "",
+    diagnosis: "",
+    medication: "",
+    vaccination: "",
+    treatDate: "",
+    followUp: false,
+    followUpDate: "",
+    payment: "",
+    isPaid: false,
   });
 
   // get treatment info
@@ -55,13 +59,17 @@ const Treatment = () => {
         setTreatments([...treatments, response.data]);
       }
       setFormData({
-        appointedBy: "",
         petName: "",
         vetName: "",
-        appointDate: "",
-        duration: "",
-        status: "",
-        reason: "",
+        nurseName: "",
+        diagnosis: "",
+        medication: "",
+        vaccination: "",
+        treatDate: "",
+        followUp: false,
+        followUpDate: "",
+        payment: "",
+        isPaid: false,
       });
     } catch (error) {
       alert("Failed to save treatment record.");
@@ -72,13 +80,17 @@ const Treatment = () => {
   const handleEdit = (t) => {
     setEditingTreatment(t);
     setFormData({
-      appointedBy: t.appointedBy,
       petName: t.petName,
       vetName: t.vetName,
-      appointDate: t.appointDate,
-      duration: t.duration,
-      status: t.status,
-      reason: t.reason,
+      nurseName: t.nurseName,
+      diagnosis: t.diagnosis,
+      medication: t.medication,
+      vaccination: t.vaccination,
+      treatDate: t.treatDate,
+      followUp: t.followUp,
+      followUpDate: t.followUpDate,
+      payment: t.payment,
+      isPaid: t.isPaid,
     });
   };
 
@@ -104,18 +116,35 @@ const Treatment = () => {
         <h2 className="text-xl font-bold mb-4">
           {editingTreatment ? "Edit Treatment" : "Add Treatment"}
         </h2>
-        {Object.keys(formData).map((key) => (
-          <input
-            key={key}
-            type={key === "appointDate" ? "datetime-local" : "text"}
-            placeholder={key}
-            value={formData[key]}
-            onChange={(e) =>
-              setFormData({ ...formData, [key]: e.target.value })
-            }
-            className="w-full mb-4 p-2 border rounded"
-          />
-        ))}
+        {Object.keys(formData).map((key) =>
+          typeof formData[key] === "boolean" ? (
+            <label key={key} className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                checked={formData[key]}
+                onChange={(e) =>
+                  setFormData({ ...formData, [key]: e.target.checked })
+                }
+                className="mr-2"
+              />
+              {key} {/* 這裡就是提示文字 */}
+            </label>
+          ) : (
+            <input
+              key={key}
+              type={
+                key === "treatDate" || key === "followUpDate" ? "date" : "text"
+              }
+              placeholder={key}
+              value={formData[key]}
+              onChange={(e) =>
+                setFormData({ ...formData, [key]: e.target.value })
+              }
+              className="w-full mb-4 p-2 border rounded"
+            />
+          )
+        )}
+
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
