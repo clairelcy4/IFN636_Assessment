@@ -127,7 +127,7 @@ const Treatment = () => {
                 }
                 className="mr-2"
               />
-              {key} {/* 這裡就是提示文字 */}
+              {key} {/* hint */}
             </label>
           ) : (
             <input
