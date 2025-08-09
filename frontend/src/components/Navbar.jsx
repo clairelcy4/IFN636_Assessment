@@ -13,16 +13,25 @@ const Navbar = () => {
   return (
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
       <Link to="/" className="text-2xl font-bold">
-        Your apps name
+        Pet Clinic Management System
       </Link>
       <div>
         {user ? (
           <>
             <Link to="/tasks" className="mr-4">
-              CRUD
+              Pet Profiles
+            </Link>{" "}
+            <Link to="/tasks" className="mr-4">
+              Vet Profiles
+            </Link>{" "}
+            <Link to="/tasks" className="mr-4">
+              Appointments
+            </Link>{" "}
+            <Link to="/tasks" className="mr-4">
+              Treatment Records
             </Link>
             <Link to="/profile" className="mr-4">
-              Profile
+              My Account
             </Link>
             <button
               onClick={handleLogout}
