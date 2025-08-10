@@ -1,94 +1,154 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
+import { useState, useEffect } from "react";
+import axiosInstance from "../axiosConfig";
+import { useAuth } from "../context/AuthContext";
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
+  const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    university: '',
-    address: '',
+    employeeID: "",
+    name: "",
+    phoneNumber: "",
+    email: "",
+    specialty: "",
+    licenseNum: "",
   });
-  const [loading, setLoading] = useState(false);
 
+  // role including "Vet", "Nurse", "AdminStaff"
+  const role = user?.role || "";
+
+  // personal info
   useEffect(() => {
-    // Fetch profile data from the backend
     const fetchProfile = async () => {
-      setLoading(true);
       try {
-        const response = await axiosInstance.get('/api/auth/profile', {
+        const res = await axiosInstance.get("/api/profile", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        setProfile(res.data);
         setFormData({
-          name: response.data.name,
-          email: response.data.email,
-          university: response.data.university || '',
-          address: response.data.address || '',
+          employeeID: res.data.employeeID || "",
+          name: res.data.name || "",
+          phoneNumber: res.data.phoneNumber || "",
+          email: res.data.email || "",
+          specialty: res.data.specialty || "",
+          licenseNum: res.data.licenseNum || "",
         });
-      } catch (error) {
-        alert('Failed to fetch profile. Please try again.');
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        alert("Failed to fetch profile");
       }
     };
-
-    if (user) fetchProfile();
+    fetchProfile();
   }, [user]);
+
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  const validateForm = () => {
+    if (!formData.employeeID) {
+      alert("Employee ID is required");
+      return false;
+    }
+    if (!formData.name) {
+      alert("Name is required");
+      return false;
+    }
+    if (!formData.phoneNumber) {
+      alert("Phone Number is required");
+      return false;
+    }
+    if (!formData.email) {
+      alert("Email is required");
+      return false;
+    }
+
+    // different required fields
+    if (role === "VET" && !formData.specialty) {
+      alert("Specialty is required for VET");
+      return false;
+    }
+    if ((role === "VET" || role === "NURSE") && !formData.licenseNum) {
+      alert("License Number is required for VET or NURSE");
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!validateForm()) return;
+
     try {
-      await axiosInstance.put('/api/auth/profile', formData, {
+      const res = await axiosInstance.put("/api/profile", formData, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      alert('Profile updated successfully!');
-    } catch (error) {
-      alert('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
+      setProfile(res.data);
+      alert("Profile updated successfully");
+    } catch (err) {
+      alert("Failed to update profile");
     }
   };
 
-  if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Your Profile</h1>
+    <div className="container mx-auto p-6">
+      <h2 className="text-xl font-bold mb-4">My Profile</h2>
+      <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded">
+        <input
+          type="number"
+          placeholder="Employee ID"
+          value={formData.employeeID}
+          onChange={(e) => handleChange("employeeID", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
         <input
           type="text"
           placeholder="Name"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Phone Number"
+          value={formData.phoneNumber}
+          onChange={(e) => handleChange("phoneNumber", e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
         <input
           type="email"
           placeholder="Email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => handleChange("email", e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
-        <input
-          type="text"
-          placeholder="University"
-          value={formData.university}
-          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-          {loading ? 'Updating...' : 'Update Profile'}
+
+        {/* only a vet need specialty */}
+        {role === "VET" && (
+          <input
+            type="text"
+            placeholder="Specialty"
+            value={formData.specialty}
+            onChange={(e) => handleChange("specialty", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          />
+        )}
+
+        {/* only a vet or a nurse has license number */}
+        {(role === "VET" || role === "NURSE") && (
+          <input
+            type="text"
+            placeholder="License Number"
+            value={formData.licenseNum}
+            onChange={(e) => handleChange("licenseNum", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          />
+        )}
+
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Save Profile
         </button>
       </form>
     </div>
