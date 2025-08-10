@@ -3,9 +3,9 @@ import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
 // relevant to Appointments
 import { useParams } from "react-router-dom";
-const { appointmentId } = useParams();
 
 const Treatment = () => {
+  const { appointmentId } = useParams();
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
