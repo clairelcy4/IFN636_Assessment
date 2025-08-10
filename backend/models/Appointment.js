@@ -9,6 +9,14 @@ const appointmentSchema = new mongoose.Schema(
     duration: { type: Number, required: true },
     status: { type: String },
     reason: { type: String },
+
+    // relationship with treatment
+    treatments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Treatment",
+      },
+    ],
   },
   {
     timestamps: true,
