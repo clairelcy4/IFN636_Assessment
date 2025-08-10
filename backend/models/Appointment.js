@@ -1,0 +1,18 @@
+import mongoose from "mongoose";
+
+const appointmentSchema = new mongoose.Schema(
+  {
+    appointedBy: { type: String, required: true },
+    petName: { type: String, required: true },
+    vetName: { type: String, required: true },
+    appointDate: { type: Date, required: true },
+    duration: { type: Number, required: true },
+    status: { type: String },
+    reason: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Appointment", appointmentSchema);
