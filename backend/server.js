@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
+import vetScheduleRoutes from "./routes/vetScheduleRoutes.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use("/api/auth", require("./routes/authRoutes"));
 // app.use("/api/tasks", require("./routes/taskRoutes"));
 app.use("/api/pets", require("./routes/petRoutes"));
 app.use("/api/treatments", require("./routes/treatmentRoutes"));
+app.use("/api/vet-schedules", vetScheduleRoutes);
 
 // Export the app object for testing
 if (require.main === module) {

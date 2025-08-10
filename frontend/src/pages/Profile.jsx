@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     employeeID: "",
     name: "",
@@ -151,6 +153,16 @@ const Profile = () => {
           Save Profile
         </button>
       </form>
+      {/* vet schedule */}
+      {role === "VET" && (
+        <button
+          type="button"
+          onClick={() => navigate(`/vet-schedule/${user._id}`)}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          View Schedule
+        </button>
+      )}
     </div>
   );
 };
