@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+// relevant to Appointments
+import { useParams } from "react-router-dom";
+const { appointmentId } = useParams();
 
 const Treatment = () => {
   const { user } = useAuth();
@@ -10,6 +13,7 @@ const Treatment = () => {
   const [showMedication, setShowMedication] = useState(false);
   const [showVaccination, setShowVaccination] = useState(false);
   const [formData, setFormData] = useState({
+    appointmentId: appointmentId || "",
     petName: "",
     vetName: "",
     nurseName: "",
