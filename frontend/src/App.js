@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
 import PetProfiles from "./pages/PetProfiles";
 import Treatment from "./pages/Treatment";
+import VetSchedule from "./pages/VetSchedule";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/appointment" element={<Appointments />} />
         <Route path="/treatment" element={<Treatment />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/vet/:vetId/schedule" element={<VetSchedule />} />
       </Routes>
     </Router>
   );
