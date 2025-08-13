@@ -1,5 +1,5 @@
 import express from "express";
-import VetSchedule from "../models/vetSchedule.js";
+import VetSchedule from "../models/VetSchedule.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
