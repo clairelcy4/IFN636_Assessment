@@ -1,11 +1,11 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import connectDB from "./config/db.js";
-import vetScheduleRoutes from "./routes/vetScheduleRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import petRoutes from "./routes/petRoutes.js";
-import treatmentRoutes from "./routes/treatmentRoutes.js";
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const connectDB = require("./config/db");
+const vetScheduleRoutes = require("./routes/vetScheduleRoutes");
+const authRoutes = require("./routes/authRoutes");
+const petRoutes = require("./routes/petRoutes");
+const treatmentRoutes = require("./routes/treatmentRoutes");
 
 dotenv.config();
 
@@ -24,4 +24,4 @@ if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-export default app;
+module.exports = app;
