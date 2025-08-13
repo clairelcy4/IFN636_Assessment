@@ -15,6 +15,9 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [vets, setVets] = useState([]);
+  const [selectedVet, setSelectedVet] = useState("");
+
   const [formData, setFormData] = useState({
     appointedBy: "",
     petName: "",
@@ -37,8 +40,22 @@ const Appointments = () => {
         alert("Failed to fetch appointments.");
       }
     };
-
     fetchAppointments();
+  }, [user]);
+
+  // get vet list (for dropdown)
+  useEffect(() => {
+    const fetchVets = async () => {
+      try {
+        const res = await axiosInstance.get("/api/vets", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        setVets(res.data);
+      } catch (err) {
+        console.error("Failed to fetch vets");
+      }
+    };
+    fetchVets();
   }, [user]);
 
   // form
@@ -143,7 +160,7 @@ const Appointments = () => {
 
   return (
     <div className="container mx-auto p-6">
-      {/* form */}
+      {/* appointment form */}
       <button
         onClick={() => setShowForm(!showForm)}
         className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700"
@@ -162,9 +179,7 @@ const Appointments = () => {
           {[
             { key: "petName", label: "Pet Name" },
             { key: "vetName", label: "Vet Name" },
-            { key: "status", label: "Status" },
             { key: "reason", label: "Reason" },
-            { key: "appointedBy", label: "Appointed By (Admin Staff)" },
           ].map(({ key, label }) => (
             <input
               key={key}
@@ -175,6 +190,19 @@ const Appointments = () => {
               className="w-full mb-4 p-2 border rounded"
             />
           ))}
+
+          {/* status selections */}
+          <label className="font-bold block mb-1">Status</label>
+          <select
+            value={formData.status}
+            onChange={(e) => handleChange("status", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          >
+            <option value="">Select Status</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
 
           <label className="font-bold block mb-1">
             Appointment Date & Time
@@ -194,6 +222,14 @@ const Appointments = () => {
             className="w-full mb-4 p-2 border rounded"
           />
 
+          <input
+            type="text"
+            placeholder="Appointed By (Admin Staff)"
+            value={formData.appointedBy}
+            onChange={(e) => handleChange("appointedBy", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          />
+
           <button
             type="submit"
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -203,7 +239,38 @@ const Appointments = () => {
         </form>
       )}
 
-      {/* calendar layout*/}
+      {/* vet schedule viewer */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold mb-2">View Vet Schedule</h3>
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedVet}
+            onChange={(e) => setSelectedVet(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option value="">Select a Vet</option>
+            {vets.map((vet) => (
+              <option key={vet._id} value={vet._id}>
+                {vet.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={!selectedVet}
+            onClick={() => navigate(`/vet-schedule/${selectedVet}`)}
+            className={`px-4 py-2 rounded text-white ${
+              selectedVet
+                ? "bg-blue-500 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+          >
+            View Schedule
+          </button>
+        </div>
+      </div>
+
+      {/* calendar layout */}
       <div className="bg-white p-4 shadow rounded">
         <h2 className="text-xl font-bold mb-4">Appointments Calendar</h2>
         <Calendar
@@ -212,6 +279,10 @@ const Appointments = () => {
           startAccessor="start"
           endAccessor="end"
           style={{ height: 500 }}
+          onSelectEvent={(event) => {
+            const appointment = appointments.find((a) => a._id === event.id);
+            if (appointment) handleEdit(appointment);
+          }}
         />
       </div>
     </div>

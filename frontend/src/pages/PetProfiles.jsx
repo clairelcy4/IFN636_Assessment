@@ -5,177 +5,187 @@ import { useAuth } from "../context/AuthContext";
 const PetProfiles = () => {
   const { user } = useAuth();
   const [pets, setPets] = useState([]);
-  const [editingPet, setEditingPet] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     species: "",
     age: "",
     allergyMed: "",
     ownerName: "",
-    ownerContactNum: "",
-    ownerContactEmail: "",
+    ownerPhone: "",
+    ownerEmail: "",
   });
+  const [editing, setEditing] = useState(false);
+  const [currentPetId, setCurrentPetId] = useState(null);
 
-  // get pet info
+  const fetchPets = async () => {
+    try {
+      const res = await axiosInstance.get("/api/pets", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setPets(res.data);
+    } catch (err) {
+      alert("Failed to fetch pet profiles");
+    }
+  };
+
   useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        const response = await axiosInstance.get("/api/pets", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setPets(response.data);
-      } catch (error) {
-        alert("Failed to fetch pet profiles.");
-      }
-    };
-
-    fetchPets();
+    if (user?.token) {
+      fetchPets();
+    }
   }, [user]);
 
-  // submit
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (formData.age <= 0) {
-      alert("Age must be greater than 0");
-      return;
-    }
-
     try {
-      if (editingPet) {
-        // if existed then just update
-        const response = await axiosInstance.put(
-          `/api/pets/${editingPet._id}`,
-          formData,
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        setPets(
-          pets.map((pet) => (pet._id === editingPet._id ? response.data : pet))
-        );
-        setEditingPet(null);
-      } else {
-        // if not existed then create
-        const response = await axiosInstance.post("/api/pets", formData, {
+      if (editing && currentPetId) {
+        // UPDATE
+        await axiosInstance.put(`/api/pets/${currentPetId}`, formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setPets([...pets, response.data]);
+        alert("Pet profile updated successfully");
+      } else {
+        // CREATE
+        await axiosInstance.post("/api/pets", formData, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        alert("Pet profile added successfully");
       }
-      // reset
       setFormData({
         name: "",
         species: "",
         age: "",
         allergyMed: "",
         ownerName: "",
-        ownerContactNum: "",
-        ownerContactEmail: "",
+        ownerPhone: "",
+        ownerEmail: "",
       });
-    } catch (error) {
-      alert("Failed to save pet profile.");
+      setEditing(false);
+      setCurrentPetId(null);
+      fetchPets();
+    } catch (err) {
+      alert("Failed to save pet profile");
     }
   };
 
-  // modify
   const handleEdit = (pet) => {
-    setEditingPet(pet);
     setFormData({
       name: pet.name,
       species: pet.species,
       age: pet.age,
       allergyMed: pet.allergyMed,
       ownerName: pet.ownerName,
-      ownerContactNum: pet.ownerContactNum,
-      ownerContactEmail: pet.ownerContactEmail,
+      ownerPhone: pet.ownerPhone,
+      ownerEmail: pet.ownerEmail,
     });
+    setCurrentPetId(pet.id);
+    setEditing(true);
   };
 
-  // delete
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this pet?")) return;
     try {
       await axiosInstance.delete(`/api/pets/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      setPets(pets.filter((pet) => pet._id !== id));
-    } catch (error) {
-      alert("Failed to delete pet profile.");
+      alert("Pet profile deleted successfully");
+      fetchPets();
+    } catch (err) {
+      alert("Failed to delete pet profile");
     }
   };
 
   return (
     <div className="container mx-auto p-6">
-      {/* form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-4 shadow rounded mb-6"
-      >
-        <h2 className="text-xl font-bold mb-4">
-          {editingPet ? "Edit Pet Profile" : "Add Pet Profile"}
-        </h2>
-        {[
-          { name: "name", placeholder: "Pet Name" },
-          { name: "species", placeholder: "Species" },
-          { name: "age", placeholder: "Age (years)", type: "number" },
-          { name: "allergyMed", placeholder: "Allergy Medication" },
-          { name: "ownerName", placeholder: "Owner Name" },
-          { name: "ownerContactNum", placeholder: "Owner Contact Number" },
-          { name: "ownerContactEmail", placeholder: "Owner Contact Email" },
-        ].map((field) => (
-          <input
-            key={field.name}
-            type={field.type || "text"}
-            placeholder={field.placeholder}
-            value={formData[field.name]}
-            onChange={(e) =>
-              setFormData({ ...formData, [field.name]: e.target.value })
-            }
-            className="w-full mb-4 p-2 border rounded"
-          />
-        ))}
+      <h2 className="text-xl font-bold mb-4">
+        {editing ? "Edit Pet Profile" : "Add Pet Profile"}
+      </h2>
+      <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded">
+        <input
+          type="text"
+          placeholder="Pet Name"
+          value={formData.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Species"
+          value={formData.species}
+          onChange={(e) => handleChange("species", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="number"
+          placeholder="Age"
+          value={formData.age}
+          onChange={(e) => handleChange("age", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Allergy Med"
+          value={formData.allergyMed}
+          onChange={(e) => handleChange("allergyMed", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Owner Name"
+          value={formData.ownerName}
+          onChange={(e) => handleChange("ownerName", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Owner Phone"
+          value={formData.ownerPhone}
+          onChange={(e) => handleChange("ownerPhone", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="email"
+          placeholder="Owner Email"
+          value={formData.ownerEmail}
+          onChange={(e) => handleChange("ownerEmail", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
         >
-          {editingPet ? "Update" : "Add"}
+          {editing ? "Update" : "Add"}
         </button>
       </form>
 
-      {/* Pet profile list */}
-      <div className="bg-white p-4 shadow rounded">
-        <h2 className="text-xl font-bold mb-4">Pet Profile List</h2>
-        {pets.length === 0 ? (
-          <p>No pet profiles available.</p>
-        ) : (
-          pets.map((pet) => (
-            <div
-              key={pet._id}
-              className="flex justify-between items-center border-b py-2"
+      <h3 className="text-lg font-bold mt-6">Pet Profile List</h3>
+      {pets.map((pet) => (
+        <div key={pet.id} className="bg-gray-100 p-4 my-2 rounded shadow">
+          {pet.name} ({pet.species}), Age: {pet.age}
+          <br />
+          Allergy Med: {pet.allergyMed}
+          <br />
+          Owner: {pet.ownerName} | {pet.ownerPhone} | {pet.ownerEmail}
+          <div className="mt-2">
+            <button
+              onClick={() => handleEdit(pet)}
+              className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
             >
-              <div>
-                <strong>{pet.name}</strong> ({pet.species}), Age: {pet.age}
-                <br />
-                Allergy Med: {pet.allergyMed || "None"}
-                <br />
-                Owner: {pet.ownerName} | {pet.ownerContactNum} |{" "}
-                {pet.ownerContactEmail}
-              </div>
-              <div>
-                <button
-                  onClick={() => handleEdit(pet)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(pet._id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+              Edit
+            </button>
+            <button
+              onClick={() => handleDelete(pet.id)}
+              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

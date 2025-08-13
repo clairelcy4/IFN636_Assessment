@@ -1,8 +1,17 @@
+// import axios from "axios";
+
+// const axiosInstance = axios.create({
+//   baseURL: "http://localhost:5002", // local
+//   //baseURL: 'http://54.66.221.225:5001', // live
+//   headers: { "Content-Type": "application/json" },
+// });
+
+// export default axiosInstance;
+
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5002", // local
-  //baseURL: 'http://3.26.96.188:5001', // live
+  baseURL: process.env.REACT_APP_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
