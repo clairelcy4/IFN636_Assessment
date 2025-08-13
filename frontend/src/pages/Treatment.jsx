@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
 // relevant to Appointments
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Treatment = () => {
-  const { appointmentId } = useParams();
+  const { appointmentId, treatmentId } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
@@ -53,20 +54,112 @@ const Treatment = () => {
   });
 
   // get treatment info
+  const fetchTreatments = async () => {
+    if (!user?.token) {
+      console.warn("No token found, cannot fetch treatments");
+      return;
+    }
+    try {
+      const res = await axiosInstance.get("/api/treatments", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      const data = res.data.map((t) => ({
+        ...t,
+        diagnosisRecords: t.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: t.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: t.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+      }));
+      setTreatments(data);
+    } catch (err) {
+      alert("Failed to fetch treatments");
+    }
+  };
   useEffect(() => {
-    const fetchTreatments = async () => {
-      try {
-        const response = await axiosInstance.get("/api/treatments", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setTreatments(response.data);
-      } catch (error) {
-        alert("Failed to fetch treatments.");
-      }
-    };
+    if (!user?.token) return;
 
-    fetchTreatments();
-  }, [user]);
+    if (treatmentId) {
+      // EDIT
+      fetchSingleTreatment();
+    } else {
+      // CREATW
+      fetchTreatments();
+    }
+  }, [user, treatmentId]);
+
+  const fetchSingleTreatment = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/treatments/${treatmentId}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setEditingTreatment(res.data);
+      setFormData({
+        appointmentId: res.data.appointmentId || "",
+        petName: res.data.petName || "",
+        vetName: res.data.vetName || "",
+        nurseName: res.data.nurseName || "",
+        diagnosisRecords: res.data.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: res.data.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: res.data.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+        treatDate: res.data.treatDate || "",
+        followUp: res.data.followUp || false,
+        followUpDate: res.data.followUpDate || "",
+        payment: res.data.payment || "",
+        isPaid: res.data.isPaid || false,
+      });
+    } catch (err) {
+      console.error("Failed to fetch treatment", err);
+    }
+  };
 
   // normal input
   const handleChange = (key, value) => {
@@ -120,32 +213,104 @@ const Treatment = () => {
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!user?.token) {
+      alert("You must be logged in to save treatments.");
+      return;
+    }
+
     try {
       if (editingTreatment) {
-        const response = await axiosInstance.put(
+        // UPDATE
+        const res = await axiosInstance.put(
           `/api/treatments/${editingTreatment._id}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
-        setTreatments(
-          treatments.map((t) =>
-            t._id === editingTreatment._id ? response.data : t
-          )
-        );
-        setEditingTreatment(null);
+        setEditingTreatment(res.data);
       } else {
-        const response = await axiosInstance.post("/api/treatments", formData, {
+        // CREATE
+        await axiosInstance.post("/api/treatments", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setTreatments([...treatments, response.data]);
       }
+
+      // REFRESH
+      await fetchTreatments();
+
+      // back to list
+      navigate("/treatment");
+
+      const res = await axiosInstance.get("/api/treatments", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      const data = res.data.map((t) => ({
+        ...t,
+        diagnosisRecords: t.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: t.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: t.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+      }));
+      setTreatments(data);
+
+      // CLEAR
       setFormData({
+        appointmentId: appointmentId || "",
         petName: "",
         vetName: "",
         nurseName: "",
-        diagnosis: "",
-        medication: "",
-        vaccination: "",
+        diagnosisRecords: [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
         treatDate: "",
         followUp: false,
         followUpDate: "",
@@ -153,29 +318,21 @@ const Treatment = () => {
         isPaid: false,
       });
     } catch (error) {
-      alert("Failed to save treatment record.");
+      console.error("Error saving treatment:", error.response?.data || error);
+      alert(
+        `Failed to save treatment record. ${
+          error.response?.data?.message || ""
+        }`
+      );
     }
   };
 
-  // edit
+  // EDIT
   const handleEdit = (t) => {
-    setEditingTreatment(t);
-    setFormData({
-      petName: t.petName,
-      vetName: t.vetName,
-      nurseName: t.nurseName,
-      diagnosis: t.diagnosis,
-      medication: t.medication,
-      vaccination: t.vaccination,
-      treatDate: t.treatDate,
-      followUp: t.followUp,
-      followUpDate: t.followUpDate,
-      payment: t.payment,
-      isPaid: t.isPaid,
-    });
+    navigate(`/treatment/${t._id}`);
   };
 
-  // delete
+  // DELETE
   const handleDelete = async (id) => {
     try {
       await axiosInstance.delete(`/api/treatments/${id}`, {
@@ -202,7 +359,6 @@ const Treatment = () => {
           { key: "petName", label: "Pet Name" },
           { key: "vetName", label: "Vet Name" },
           { key: "nurseName", label: "Nurse Name" },
-          { key: "diagnosis", label: "Diagnosis" },
         ].map(({ key, label }) => (
           <input
             key={key}

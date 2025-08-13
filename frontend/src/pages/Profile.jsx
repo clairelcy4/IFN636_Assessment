@@ -5,8 +5,13 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState(null);
+  console.log("Current user from AuthContext:", user);
+  console.log("Token from user:", user?.token);
+  console.log("LocalStorage user:", localStorage.getItem("user"));
+
   const navigate = useNavigate();
+
+  const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
     employeeID: "",
     name: "",
@@ -19,12 +24,15 @@ const Profile = () => {
   // role including "Vet", "Nurse", "AdminStaff"
   const role = user?.role || "";
 
+  // get token from AuthContext or localStorage
+  const token = user?.token || JSON.parse(localStorage.getItem("user"))?.token;
+
   // personal info
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get("/api/profile", {
-          headers: { Authorization: `Bearer ${user.token}` },
+        const res = await axiosInstance.get("/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(res.data);
         setFormData({
@@ -39,8 +47,10 @@ const Profile = () => {
         alert("Failed to fetch profile");
       }
     };
-    fetchProfile();
-  }, [user]);
+    if (token) {
+      fetchProfile();
+    }
+  }, [token]);
 
   const handleChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -81,8 +91,8 @@ const Profile = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axiosInstance.put("/api/profile", formData, {
-        headers: { Authorization: `Bearer ${user.token}` },
+      const res = await axiosInstance.put("/api/auth/profile", formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(res.data);
       alert("Profile updated successfully");
