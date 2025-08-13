@@ -1,46 +1,61 @@
-import mongoose from "mongoose";
+const express = require("express");
+const VetSchedule = require("../models/VetSchedule");
+const { protect } = require("../middleware/authMiddleware");
 
-const vetScheduleSchema = new mongoose.Schema(
-  {
-    vetId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Vet",
-      required: true,
-    },
-    scheduleType: {
-      type: String,
-      enum: ["work", "off", "booked"],
-      required: true,
-    },
-    // off, booked == not available ; work == available
-    available: {
-      type: Boolean,
-      default: true,
-    },
-    startTime: {
-      type: Date,
-      required: true,
-    },
-    endTime: {
-      type: Date,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
+const router = express.Router();
 
-// scheduleType : work == available
-vetScheduleSchema.pre("save", function (next) {
-  this.available = this.scheduleType === "work";
-  next();
-});
-
-vetScheduleSchema.pre("findOneAndUpdate", function (next) {
-  const update = this.getUpdate();
-  if (update.scheduleType) {
-    update.available = update.scheduleType === "work";
+// GET
+router.get("/:vetId", protect, async (req, res) => {
+  try {
+    const schedules = await VetSchedule.find({ vetId: req.params.vetId }).sort({
+      startTime: 1,
+    });
+    res.json(schedules);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch schedules" });
   }
-  next();
 });
 
-export default mongoose.model("VetSchedule", vetScheduleSchema);
+// POST
+router.post("/", protect, async (req, res) => {
+  try {
+    const { vetId, scheduleType, startTime, endTime } = req.body;
+    const schedule = new VetSchedule({
+      vetId,
+      scheduleType,
+      startTime,
+      endTime,
+    });
+    await schedule.save();
+    res.status(201).json(schedule);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create schedule" });
+  }
+});
+
+// UPDATE
+router.put("/:id", protect, async (req, res) => {
+  try {
+    const { scheduleType, startTime, endTime } = req.body;
+    const updatedSchedule = await VetSchedule.findByIdAndUpdate(
+      req.params.id,
+      { scheduleType, startTime, endTime },
+      { new: true, runValidators: true }
+    );
+    res.json(updatedSchedule);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update schedule" });
+  }
+});
+
+// DELETE
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    await VetSchedule.findByIdAndDelete(req.params.id);
+    res.json({ message: "Schedule deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete schedule" });
+  }
+});
+
+module.exports = router;
