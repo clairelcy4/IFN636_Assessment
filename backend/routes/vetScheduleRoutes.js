@@ -1,6 +1,6 @@
-import express from "express";
-import VetSchedule from "../models/VetSchedule.js";
-import { protect } from "../middleware/authMiddleware.js";
+const express = require("express");
+const VetSchedule = require("../models/VetSchedule");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -58,4 +58,4 @@ router.delete("/:id", protect, async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
