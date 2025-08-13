@@ -13,16 +13,16 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // recover after testing
-    // try {
-    //   await axiosInstance.post("/api/auth/register", formData);
-    //   alert("Registration successful. Please log in.");
-    //   navigate("/login");
-    // } catch (error) {
-    //   alert("Registration failed. Please try again.");
-    // }
+    try {
+      await axiosInstance.post("/api/auth/register", formData);
+      alert("Registration successful. Please log in.");
+      navigate("/login");
+    } catch (error) {
+      alert("Registration failed. Please try again.");
+    }
     // for test only
-    alert("backdoor test login!");
-    navigate("/login");
+    // alert("backdoor test login!");
+    // navigate("/login");
   };
 
   return (
