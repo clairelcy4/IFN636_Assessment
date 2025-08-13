@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
   res.json(treatments);
 });
 
-// GET single treatment
+// GET
 router.get("/:id", (req, res) => {
   const treatment = treatments.find((t) => t._id === req.params.id);
   if (!treatment) {
