@@ -1,3 +1,5 @@
+dotenv.config();
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -6,8 +8,6 @@ const vetScheduleRoutes = require("./routes/vetScheduleRoutes");
 const authRoutes = require("./routes/authRoutes");
 const petRoutes = require("./routes/petRoutes");
 const treatmentRoutes = require("./routes/treatmentRoutes");
-
-dotenv.config();
 
 const app = express();
 
