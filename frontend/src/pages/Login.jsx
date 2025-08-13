@@ -19,7 +19,7 @@ const Login = () => {
     try {
       const data = await login(formData); // 從 AuthContext 呼叫後端
       console.log("Login success:", data);
-      navigate("/"); // the page after login
+      navigate("/appointments"); // 登入後跳轉到 Appointments
     } catch (err) {
       alert(err.message || "Login failed. Please try again.");
     }
