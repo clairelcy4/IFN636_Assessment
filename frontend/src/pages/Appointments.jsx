@@ -179,9 +179,7 @@ const Appointments = () => {
           {[
             { key: "petName", label: "Pet Name" },
             { key: "vetName", label: "Vet Name" },
-            { key: "status", label: "Status" },
             { key: "reason", label: "Reason" },
-            { key: "appointedBy", label: "Appointed By (Admin Staff)" },
           ].map(({ key, label }) => (
             <input
               key={key}
@@ -192,6 +190,19 @@ const Appointments = () => {
               className="w-full mb-4 p-2 border rounded"
             />
           ))}
+
+          {/* status selections */}
+          <label className="font-bold block mb-1">Status</label>
+          <select
+            value={formData.status}
+            onChange={(e) => handleChange("status", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          >
+            <option value="">Select Status</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
 
           <label className="font-bold block mb-1">
             Appointment Date & Time
@@ -208,6 +219,14 @@ const Appointments = () => {
             placeholder="Duration (minutes)"
             value={formData.duration}
             onChange={(e) => handleChange("duration", e.target.value)}
+            className="w-full mb-4 p-2 border rounded"
+          />
+
+          <input
+            type="text"
+            placeholder="Appointed By (Admin Staff)"
+            value={formData.appointedBy}
+            onChange={(e) => handleChange("appointedBy", e.target.value)}
             className="w-full mb-4 p-2 border rounded"
           />
 
@@ -260,6 +279,10 @@ const Appointments = () => {
           startAccessor="start"
           endAccessor="end"
           style={{ height: 500 }}
+          onSelectEvent={(event) => {
+            const appointment = appointments.find((a) => a._id === event.id);
+            if (appointment) handleEdit(appointment);
+          }}
         />
       </div>
     </div>

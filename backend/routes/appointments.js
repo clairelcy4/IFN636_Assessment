@@ -1,8 +1,6 @@
-// routes/appointments.js
 const express = require("express");
 const router = express.Router();
 
-// testing
 let appointments = [];
 
 // GET
