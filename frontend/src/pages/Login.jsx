@@ -11,18 +11,18 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // recover after testing
-    // try {
-    //   const response = await axiosInstance.post('/api/auth/login', formData);
-    //   login(response.data);
-    //   navigate('/tasks');
-    // } catch (error) {
-    //   alert('Login failed. Please try again.');
-    // }
+    try {
+      const response = await axiosInstance.post("/api/auth/login", formData);
+      login(response.data);
+      navigate("/tasks");
+    } catch (error) {
+      alert("Login failed. Please try again.");
+    }
 
     // for test only
-    alert("backdoor test login!");
-    localStorage.setItem("user", JSON.stringify({ name: "Test User" }));
-    navigate("/");
+    // alert("backdoor test login!");
+    // localStorage.setItem("user", JSON.stringify({ name: "Test User" }));
+    // navigate("/");
   };
 
   return (
