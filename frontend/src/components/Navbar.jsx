@@ -3,11 +3,11 @@ import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   // recover after testing
-  // const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  // test only
-  const { logout } = useAuth(); // temp
-  const user = {}; // temp
+  // // test only
+  // const { logout } = useAuth(); // temp
+  // const user = {}; // temp
 
   const navigate = useNavigate();
 

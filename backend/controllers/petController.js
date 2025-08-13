@@ -6,12 +6,14 @@ const getPets = (req, res) => {
 };
 
 const addPet = (req, res) => {
+  console.log("AddPet req.body:", req.body); // debug
   const pet = { id: Date.now().toString(), ...req.body };
   pets.push(pet);
   res.status(201).json(pet);
 };
 
 const updatePet = (req, res) => {
+  console.log("UpdatePet req.body:", req.body); // debug
   const index = pets.findIndex((p) => p.id === req.params.id);
   if (index === -1) {
     return res.status(404).json({ message: "Pet not found" });
