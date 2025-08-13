@@ -1,60 +1,59 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../axiosConfig";
 
 const Register = () => {
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const navigate = useNavigate();
+
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // recover after testing
     try {
-      await axiosInstance.post("/api/auth/register", formData);
-      alert("Registration successful. Please log in.");
-      navigate("/login");
-    } catch (error) {
-      alert("Registration failed. Please try again.");
+      const data = await register(formData); // 從 AuthContext 呼叫後端
+      console.log("Register success:", data);
+      navigate("/"); // 註冊成功導回首頁
+    } catch (err) {
+      alert(err.message || "Registration failed");
     }
-    // for test only
-    // alert("backdoor test login!");
-    // navigate("/login");
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+    <div className="container mx-auto p-6">
+      <h2 className="text-xl font-bold mb-4">Register</h2>
+      <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded">
         <input
           type="text"
           placeholder="Name"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => handleChange("name", e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
         <input
           type="email"
           placeholder="Email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => handleChange("email", e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
         <input
           type="password"
           placeholder="Password"
           value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
+          onChange={(e) => handleChange("password", e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-2 rounded"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
         >
           Register
         </button>
