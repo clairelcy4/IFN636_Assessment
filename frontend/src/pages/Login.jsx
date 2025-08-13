@@ -19,10 +19,14 @@ const Login = () => {
     try {
       const data = await login(formData); // 從 AuthContext 呼叫後端
       console.log("Login success:", data);
-      navigate("/"); // 登入成功導回首頁
+      navigate("/"); // the page after login
     } catch (err) {
-      alert(err.message || "Login failed");
+      alert(err.message || "Login failed. Please try again.");
     }
+    // for test only
+    // alert("backdoor test login!");
+    // localStorage.setItem("user", JSON.stringify({ name: "Test User" }));
+    // navigate("/");
   };
 
   return (
