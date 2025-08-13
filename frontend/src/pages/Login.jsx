@@ -17,9 +17,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await login(formData); // 從 AuthContext 呼叫後端
+      const data = await login(formData);
       console.log("Login success:", data);
-      navigate("/appointments"); // 登入後跳轉到 Appointments
+      navigate("/appointments"); // redirect to Appointments
     } catch (err) {
       alert(err.message || "Login failed. Please try again.");
     }
