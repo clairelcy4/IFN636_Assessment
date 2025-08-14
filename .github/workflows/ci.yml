@@ -88,6 +88,10 @@ jobs:
           PORT: "5002"
         run: npm test
 
+      # install pm2
+      - name: Install PM2
+        run: npm install -g pm2
+
       # start services
       - name: Start backend & frontend
         run: |
