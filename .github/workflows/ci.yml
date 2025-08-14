@@ -51,7 +51,7 @@ jobs:
           yarn install
 
       # add swap
-      - name: Create Swap Space (3G)
+      - name: Create Swap Space (1.5)
         run: |
           # remove old swap if exists
           if [ -f /swapfile ]; then
@@ -60,7 +60,7 @@ jobs:
             sudo rm -f /swapfile
           fi
           echo "Creating new swap file..."
-          sudo fallocate -l 3G /swapfile
+          sudo fallocate -l 1.5G /swapfile
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
