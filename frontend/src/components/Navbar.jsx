@@ -27,7 +27,7 @@ const Navbar = () => {
             <Link to="/pet" className="mr-4">
               Pet Profiles
             </Link>{" "}
-            <Link to="/appointment" className="mr-4">
+            <Link to="/appointments" className="mr-4">
               Appointments
             </Link>{" "}
             {/* vet profiles are included in appointment*/}

@@ -53,6 +53,8 @@ const Appointments = () => {
     if (user?.token) fetchAppointments();
   }, [user]);
 
+
+  // get vet list (for dropdown)
   // get vet list (for dropdown)
   useEffect(() => {
     const fetchVets = async () => {
@@ -73,6 +75,7 @@ const Appointments = () => {
     };
     if (user?.token) fetchVets();
   }, [user]);
+
 
   const handleChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -254,7 +257,7 @@ const Appointments = () => {
             </form>
           )}
 
-          <div className="mb-6">
+         <div className="mb-6">
             <h3 className="text-lg font-bold mb-2">View Vet Schedule</h3>
             <div className="flex items-center space-x-2">
               <select

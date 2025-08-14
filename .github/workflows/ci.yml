@@ -1,76 +1,104 @@
-name: Assignment1 Backend CI
+name: Assignment1 Backend CI/CD
 
 on:
   push:
     branches:
-      - main # Trigger CI on pushes to the main branch
+      - main
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: self-hosted
+  deploy:
+    name: Build & Deploy to EC2
+    runs-on: [self-hosted, Linux, X64]
 
     strategy:
       matrix:
-        node-version: [22] # Test on multiple Node.js versions
-
-    environment: MONGO_URI
+        node-version: [22]
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Print Env Secret
-
+      - name: Print Env Secret (for debug only)
         env:
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
+          MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
+          JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
+          PORT: "5002"
         run: |
-          echo "Secret 1 is: $MONGO_URI"
-          echo "Secret 2 is: $JWT_SECRET"
-          echo "Secret 3 is: $PORT"
+          echo "MONGO_URI is set"
+          echo "JWT_SECRET is set"
+          echo "PORT is set"
 
-      - run: pm2 stop all
+      # stop old one
+      - run: pm2 stop all || true
 
-      # Install dependencies for backend
+      # install backend
       - name: Install Backend Dependencies
-        working-directory: ./backend
         run: |
-          npm install --global yarn
-          yarn --version
-          yarn install
+          cd backend
+          npm install
 
-      # Install dependencies for frontend
+      # install frontend
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: |
-          df -h
           sudo rm -rf ./build
           yarn install
-          yarn run build
 
-      # Run backend tests
-      - name: Run Backend Tests
-        env:
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
+      # add swap
+      - name: Create Swap Space (1.5)
+        run: |
+          # remove old swap if exists
+          if [ -f /swapfile ]; then
+            echo "Removing old swap file..."
+            sudo swapoff /swapfile || true
+            sudo rm -f /swapfile
+          fi
+          echo "Creating new swap file..."
+          sudo fallocate -l 1.5G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          echo "Swap space created"
+
+      # build frontend
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          CI=false yarn build --verbose
+
+      # create .env for backend
+      - name: Create .env for backend
         working-directory: ./backend
+        run: |
+          echo "MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0" > .env
+          echo "JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=" >> .env
+          echo "PORT=5002" >> .env
+
+      # test backend
+      - name: Run Backend Tests
+        working-directory: ./backend
+        env:
+          MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
+          JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
+          PORT: "5002"
         run: npm test
 
-      - run: npm ci
-      - run: |
-          cd ./backend
-          touch .env
-          echo "${{ secrets.PROD }}" > .env
+      # install pm2
+      - name: Install PM2
+        run: npm install -g pm2
 
-      - run: pm2 start all
+      # start services
+      - name: Start backend & frontend
+        run: |
+          pm2 start "./backend/server.js" --name="backend"
+          pm2 serve ./frontend/build 3000 --name "frontend" --spa
 
-      - run: pm2 restart all
+      # save PM2 process
+      - name: Save PM2 process list
+        run: |
+          pm2 save

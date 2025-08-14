@@ -22,9 +22,16 @@ const PetProfiles = () => {
       const res = await axiosInstance.get("/api/pets", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      setPets(res.data);
+      if (Array.isArray(res.data)) {
+        setPets(res.data);
+      } else {
+        console.error("Unexpected pets API response:", res.data);
+        setPets([]);
+      }
     } catch (err) {
+      console.error("Failed to fetch pet profiles", err);
       alert("Failed to fetch pet profiles");
+      setPets([]);
     }
   };
 
@@ -42,13 +49,11 @@ const PetProfiles = () => {
     e.preventDefault();
     try {
       if (editing && currentPetId) {
-        // UPDATE
         await axiosInstance.put(`/api/pets/${currentPetId}`, formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         alert("Pet profile updated successfully");
       } else {
-        // CREATE
         await axiosInstance.post("/api/pets", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
@@ -81,7 +86,7 @@ const PetProfiles = () => {
       ownerPhone: pet.ownerPhone,
       ownerEmail: pet.ownerEmail,
     });
-    setCurrentPetId(pet.id);
+    setCurrentPetId(pet._id);
     setEditing(true);
   };
 
@@ -163,29 +168,37 @@ const PetProfiles = () => {
       </form>
 
       <h3 className="text-lg font-bold mt-6">Pet Profile List</h3>
-      {pets.map((pet) => (
-        <div key={pet.id} className="bg-gray-100 p-4 my-2 rounded shadow">
-          {pet.name} ({pet.species}), Age: {pet.age}
-          <br />
-          Allergy Med: {pet.allergyMed}
-          <br />
-          Owner: {pet.ownerName} | {pet.ownerPhone} | {pet.ownerEmail}
-          <div className="mt-2">
-            <button
-              onClick={() => handleEdit(pet)}
-              className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => handleDelete(pet.id)}
-              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
-            >
-              Delete
-            </button>
+      {Array.isArray(pets) && pets.length > 0 ? (
+        pets.map((pet) => (
+          <div key={pet._id} className="bg-gray-100 p-4 my-2 rounded shadow">
+            {pet.name} ({pet.species}), Age: {pet.age}
+            <br />
+            Allergy Med: {pet.allergyMed}
+            <br />
+            Owner: {pet.ownerName} | {pet.ownerPhone} | {pet.ownerEmail}
+            <div className="mt-2">
+              <button
+                onClick={() => handleEdit(pet)}
+                className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(pet._id)}
+                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p>
+          {pets.length === 0
+            ? "No pet profiles found."
+            : "Loading pet profiles..."}
+        </p>
+      )}
     </div>
   );
 };
