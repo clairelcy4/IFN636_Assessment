@@ -240,6 +240,7 @@ const Treatment = () => {
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } } //later- relevant to clinic staff
         );
+        setTreatments([...treatments, response.data]);
         setEditingTreatment(null);
       } else {
         // CREATE
