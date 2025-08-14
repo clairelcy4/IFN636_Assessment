@@ -44,12 +44,25 @@ jobs:
           yarn install
 
       # install frontend
-      - name: Install Frontend Dependencies & Build
+      - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: |
           sudo rm -rf ./build
           yarn install
-          yarn run build
+
+      # + swap
+      - name: Add Swap Space
+        run: |
+          sudo fallocate -l 2G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+      # build frontend
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          CI=false yarn build --verbose
 
       # create .env for backend
       - name: Create .env for backend
