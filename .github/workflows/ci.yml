@@ -51,16 +51,20 @@ jobs:
           yarn install
 
       # add swap
-      - name: Add Swap Space
+      - name: Create Swap Space (3G)
         run: |
-          if [ ! -f /swapfile ]; then
-            sudo fallocate -l 2G /swapfile
-            sudo chmod 600 /swapfile
-            sudo mkswap /swapfile
-            sudo swapon /swapfile
-          else
-            echo "Swapfile already exists, skipping."
+          # remove old swap if exists
+          if [ -f /swapfile ]; then
+            echo "Removing old swap file..."
+            sudo swapoff /swapfile || true
+            sudo rm -f /swapfile
           fi
+          echo "Creating new swap file..."
+          sudo fallocate -l 3G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          echo "Swap space created"
 
       # build frontend
       - name: Build Frontend
