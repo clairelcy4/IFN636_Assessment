@@ -2,9 +2,6 @@
 // let pets = [];
 const Pet = require("../models/Pet");
 
-const getPets = (req, res) => {
-  res.json(pets);
-};
 const getPets = async (req, res) => {
   try {
     const pets = await Pet.find({ ownerId: req.user.id }); // ADD
