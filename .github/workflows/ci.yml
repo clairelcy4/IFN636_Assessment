@@ -53,10 +53,14 @@ jobs:
       # add swap
       - name: Add Swap Space
         run: |
-          sudo fallocate -l 2G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          if [ ! -f /swapfile ]; then
+            sudo fallocate -l 2G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+          else
+            echo "Swapfile already exists, skipping."
+          fi
 
       # build frontend
       - name: Build Frontend
