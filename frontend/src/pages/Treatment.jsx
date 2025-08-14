@@ -10,6 +10,7 @@ const Treatment = () => {
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
+  const [loading, setLoading] = useState(true);
   // default hidden the medication and vaccination
   const [showMedication, setShowMedication] = useState(false);
   const [showVaccination, setShowVaccination] = useState(false);
@@ -100,16 +101,28 @@ const Treatment = () => {
     }
   };
   useEffect(() => {
-    if (!user?.token) return;
+    const fetchTreatments = async () => {
+      try {
+        const response = await axiosInstance.get("/api/treatments", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        if (Array.isArray(response.data)) {
+          setTreatments(response.data);
+        } else {
+          console.error("Unexpected treatments API response:", response.data);
+          setTreatments([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch treatments:", error);
+        alert("Failed to fetch treatments.");
+        setTreatments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (treatmentId) {
-      // EDIT
-      fetchSingleTreatment();
-    } else {
-      // CREATW
-      fetchTreatments();
-    }
-  }, [user, treatmentId]);
+    if (user?.token) fetchTreatments();
+  }, [user]);
 
   const fetchSingleTreatment = async () => {
     try {
@@ -200,12 +213,12 @@ const Treatment = () => {
         notes: "",
       };
     }
-    setFormData({ ...formData, [key]: [...formData[key], newItem] });
+    setFormData({ ...formData, [key]: [...(formData[key] || []), newItem] });
   };
 
   // remove array
   const removeArrayField = (key, index) => {
-    const updated = [...formData[key]];
+    const updated = Array.isArray(formData[key]) ? [...formData[key]] : [];
     updated.splice(index, 1);
     setFormData({ ...formData, [key]: updated });
   };
@@ -775,7 +788,7 @@ const Treatment = () => {
       {/* list */}
       <div className="bg-white p-4 shadow rounded">
         <h2 className="text-xl font-bold mb-4">Treatment Records</h2>
-        {treatments.length === 0 ? (
+        {!Array.isArray(treatments) || treatments.length === 0 ? (
           <p>No treatment records available.</p>
         ) : (
           treatments.map((t) => (
