@@ -38,10 +38,9 @@ jobs:
 
       # install backend
       - name: Install Backend Dependencies
-        working-directory: ./backend
         run: |
-          npm install --global yarn
-          yarn install
+          cd backend
+          npm install
 
       # install frontend
       - name: Install Frontend Dependencies
