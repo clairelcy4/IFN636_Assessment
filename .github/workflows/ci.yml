@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Build & Deploy to EC2
-    runs-on: self-hosted
+    runs-on: [self-hosted, Linux, X64]
 
     strategy:
       matrix:
@@ -25,9 +25,9 @@ jobs:
 
       - name: Print Env Secret (for debug only)
         env:
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
+          MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
+          JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
+          PORT: "5002"
         run: |
           echo "MONGO_URI is set"
           echo "JWT_SECRET is set"
@@ -50,13 +50,21 @@ jobs:
           sudo rm -rf ./build
           yarn install
 
-      # + swap
-      - name: Add Swap Space
+      # add swap
+      - name: Create Swap Space (3G)
         run: |
-          sudo fallocate -l 2G /swapfile
+          # remove old swap if exists
+          if [ -f /swapfile ]; then
+            echo "Removing old swap file..."
+            sudo swapoff /swapfile || true
+            sudo rm -f /swapfile
+          fi
+          echo "Creating new swap file..."
+          sudo fallocate -l 3G /swapfile
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
+          echo "Swap space created"
 
       # build frontend
       - name: Build Frontend
@@ -68,19 +76,17 @@ jobs:
       - name: Create .env for backend
         working-directory: ./backend
         run: |
-          touch .env
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
+          echo "MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0" > .env
+          echo "JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=" >> .env
+          echo "PORT=5002" >> .env
 
       # test backend
       - name: Run Backend Tests
         working-directory: ./backend
         env:
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
-
+          MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
+          JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
+          PORT: "5002"
         run: npm test
 
       # start services
