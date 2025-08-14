@@ -10,9 +10,10 @@ const getPets = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 const addPet = async (req, res) => {
   try {
-    const pet = await Pet.create({ ...req.body, ownerId: req.user.id });
+    const pet = await Pet.create({ ...req.body, ownerId: req.user.id }); // ADD
     res.status(201).json(pet);
   } catch (error) {
     res.status(500).json({ message: error.message });

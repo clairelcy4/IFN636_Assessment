@@ -1,88 +1,338 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+// relevant to Appointments
+import { useParams, useNavigate } from "react-router-dom";
 
 const Treatment = () => {
+  const { appointmentId, treatmentId } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
+  // default hidden the medication and vaccination
+  const [showMedication, setShowMedication] = useState(false);
+  const [showVaccination, setShowVaccination] = useState(false);
   const [formData, setFormData] = useState({
-    appointedBy: "",
+    appointmentId: appointmentId || "",
     petName: "",
     vetName: "",
-    appointDate: "",
-    duration: "",
-    status: "",
-    reason: "",
+    nurseName: "",
+    diagnosisRecords: [
+      {
+        weight: "",
+        temperature: "",
+        symptoms: "",
+        mediExam: "",
+        diagnosis: "",
+      },
+    ],
+    medication: [
+      {
+        medicationName: "",
+        dose: "",
+        frequency: "",
+        duration: "",
+        instruction: "",
+        sideEffect: "",
+      },
+    ],
+    vaccination: [
+      {
+        vaccineName: "",
+        vaccinationDate: "",
+        nextVacDate: "",
+        observation: "",
+        notes: "",
+      },
+    ],
+    treatDate: "",
+    followUp: false,
+    followUpDate: "",
+    payment: "",
+    isPaid: false,
   });
 
   // get treatment info
+  const fetchTreatments = async () => {
+    if (!user?.token) {
+      console.warn("No token found, cannot fetch treatments");
+      return;
+    }
+    try {
+      const res = await axiosInstance.get("/api/treatments", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      const data = res.data.map((t) => ({
+        ...t,
+        diagnosisRecords: t.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: t.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: t.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+      }));
+      setTreatments(data);
+    } catch (err) {
+      alert("Failed to fetch treatments");
+    }
+  };
   useEffect(() => {
-    const fetchTreatments = async () => {
-      try {
-        const response = await axiosInstance.get("/api/treatments", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setTreatments(response.data);
-      } catch (error) {
-        alert("Failed to fetch treatments.");
-      }
-    };
+    if (!user?.token) return;
 
-    fetchTreatments();
-  }, [user]);
+    if (treatmentId) {
+      // EDIT
+      fetchSingleTreatment();
+    } else {
+      // CREATW
+      fetchTreatments();
+    }
+  }, [user, treatmentId]);
+
+  const fetchSingleTreatment = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/treatments/${treatmentId}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setEditingTreatment(res.data);
+      setFormData({
+        appointmentId: res.data.appointmentId || "",
+        petName: res.data.petName || "",
+        vetName: res.data.vetName || "",
+        nurseName: res.data.nurseName || "",
+        diagnosisRecords: res.data.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: res.data.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: res.data.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+        treatDate: res.data.treatDate || "",
+        followUp: res.data.followUp || false,
+        followUpDate: res.data.followUpDate || "",
+        payment: res.data.payment || "",
+        isPaid: res.data.isPaid || false,
+      });
+    } catch (err) {
+      console.error("Failed to fetch treatment", err);
+    }
+  };
+
+  // normal input
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  // sub form input (medication and vaccination)
+  const handleArrayChange = (key, index, field, value) => {
+    const updated = [...formData[key]];
+    updated[index][field] = value;
+    setFormData({ ...formData, [key]: updated });
+  };
+  const addArrayField = (key) => {
+    let newItem = {};
+    if (key === "diagnosisRecords") {
+      newItem = {
+        weight: "",
+        temperature: "",
+        symptoms: "",
+        mediExam: "",
+        diagnosis: "",
+      };
+    } else if (key === "medication") {
+      newItem = {
+        medicationName: "",
+        dose: "",
+        frequency: "",
+        duration: "",
+        instruction: "",
+        sideEffect: "",
+      };
+    } else if (key === "vaccination") {
+      newItem = {
+        vaccineName: "",
+        vaccinationDate: "",
+        nextVacDate: "",
+        observation: "",
+        notes: "",
+      };
+    }
+    setFormData({ ...formData, [key]: [...formData[key], newItem] });
+  };
+
+  // remove array
+  const removeArrayField = (key, index) => {
+    const updated = [...formData[key]];
+    updated.splice(index, 1);
+    setFormData({ ...formData, [key]: updated });
+  };
 
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!user?.token) {
+      alert("You must be logged in to save treatments.");
+      return;
+    }
+
     try {
       if (editingTreatment) {
-        const response = await axiosInstance.put(
+        // UPDATE
+        const res = await axiosInstance.put(
           `/api/treatments/${editingTreatment._id}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
-        setTreatments(
-          treatments.map((t) =>
-            t._id === editingTreatment._id ? response.data : t
-          )
-        );
-        setEditingTreatment(null);
+        setEditingTreatment(res.data);
       } else {
-        const response = await axiosInstance.post("/api/treatments", formData, {
+        // CREATE
+        await axiosInstance.post("/api/treatments", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setTreatments([...treatments, response.data]);
       }
+
+      // REFRESH
+      await fetchTreatments();
+
+      // back to list
+      navigate("/treatment");
+
+      const res = await axiosInstance.get("/api/treatments", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      const data = res.data.map((t) => ({
+        ...t,
+        diagnosisRecords: t.diagnosisRecords || [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: t.medication || [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: t.vaccination || [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+      }));
+      setTreatments(data);
+
+      // CLEAR
       setFormData({
-        appointedBy: "",
+        appointmentId: appointmentId || "",
         petName: "",
         vetName: "",
-        appointDate: "",
-        duration: "",
-        status: "",
-        reason: "",
+        nurseName: "",
+        diagnosisRecords: [
+          {
+            weight: "",
+            temperature: "",
+            symptoms: "",
+            mediExam: "",
+            diagnosis: "",
+          },
+        ],
+        medication: [
+          {
+            medicationName: "",
+            dose: "",
+            frequency: "",
+            duration: "",
+            instruction: "",
+            sideEffect: "",
+          },
+        ],
+        vaccination: [
+          {
+            vaccineName: "",
+            vaccinationDate: "",
+            nextVacDate: "",
+            observation: "",
+            notes: "",
+          },
+        ],
+        treatDate: "",
+        followUp: false,
+        followUpDate: "",
+        payment: "",
+        isPaid: false,
       });
     } catch (error) {
-      alert("Failed to save treatment record.");
+      console.error("Error saving treatment:", error.response?.data || error);
+      alert(
+        `Failed to save treatment record. ${
+          error.response?.data?.message || ""
+        }`
+      );
     }
   };
 
-  // edit
+  // EDIT
   const handleEdit = (t) => {
-    setEditingTreatment(t);
-    setFormData({
-      appointedBy: t.appointedBy,
-      petName: t.petName,
-      vetName: t.vetName,
-      appointDate: t.appointDate,
-      duration: t.duration,
-      status: t.status,
-      reason: t.reason,
-    });
+    navigate(`/treatment/${t._id}`);
   };
 
-  // delete
+  // DELETE
   const handleDelete = async (id) => {
     try {
       await axiosInstance.delete(`/api/treatments/${id}`, {
@@ -104,18 +354,415 @@ const Treatment = () => {
         <h2 className="text-xl font-bold mb-4">
           {editingTreatment ? "Edit Treatment" : "Add Treatment"}
         </h2>
-        {Object.keys(formData).map((key) => (
+        {/* normal columns */}
+        {[
+          { key: "petName", label: "Pet Name" },
+          { key: "vetName", label: "Vet Name" },
+          { key: "nurseName", label: "Nurse Name" },
+        ].map(({ key, label }) => (
           <input
             key={key}
-            type={key === "appointDate" ? "datetime-local" : "text"}
-            placeholder={key}
+            type="text"
+            placeholder={label}
             value={formData[key]}
-            onChange={(e) =>
-              setFormData({ ...formData, [key]: e.target.value })
-            }
+            onChange={(e) => handleChange(key, e.target.value)}
             className="w-full mb-4 p-2 border rounded"
           />
         ))}
+
+        {/* diagnosis */}
+        <label className="font-bold block mb-2">Diagnosis Records</label>
+        {formData.diagnosisRecords.map((diag, idx) => (
+          <div
+            key={`diag-${idx}`}
+            className="mb-4 p-3 border rounded bg-gray-50"
+          >
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Weight (kg)"
+              value={diag.weight}
+              onChange={(e) =>
+                handleArrayChange(
+                  "diagnosisRecords",
+                  idx,
+                  "weight",
+                  e.target.value
+                )
+              }
+              className="w-full mb-2 p-2 border rounded"
+            />
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Temperature (°C)"
+              value={diag.temperature}
+              onChange={(e) =>
+                handleArrayChange(
+                  "diagnosisRecords",
+                  idx,
+                  "temperature",
+                  e.target.value
+                )
+              }
+              className="w-full mb-2 p-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="Symptoms"
+              value={diag.symptoms}
+              onChange={(e) =>
+                handleArrayChange(
+                  "diagnosisRecords",
+                  idx,
+                  "symptoms",
+                  e.target.value
+                )
+              }
+              className="w-full mb-2 p-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="Medical Examination"
+              value={diag.mediExam}
+              onChange={(e) =>
+                handleArrayChange(
+                  "diagnosisRecords",
+                  idx,
+                  "mediExam",
+                  e.target.value
+                )
+              }
+              className="w-full mb-2 p-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="Diagnosis"
+              value={diag.diagnosis}
+              onChange={(e) =>
+                handleArrayChange(
+                  "diagnosisRecords",
+                  idx,
+                  "diagnosis",
+                  e.target.value
+                )
+              }
+              className="w-full mb-2 p-2 border rounded"
+            />
+            <button
+              type="button"
+              onClick={() => removeArrayField("diagnosisRecords", idx)}
+              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addArrayField("diagnosisRecords")}
+          className="bg-gray-300 px-2 py-1 rounded mb-4"
+        >
+          + Add Diagnosis Record
+        </button>
+
+        {/* medication */}
+
+        <label className="font-bold block mb-2">Medication</label>
+        {!showMedication ? (
+          <button
+            type="button"
+            onClick={() => setShowMedication(true)}
+            className="bg-gray-300 px-2 py-1 rounded mb-4"
+          >
+            + Add Medication
+          </button>
+        ) : (
+          <>
+            {formData.medication.map((med, idx) => (
+              <div
+                key={`med-${idx}`}
+                className="mb-4 p-3 border rounded bg-gray-50"
+              >
+                <input
+                  type="text"
+                  placeholder="Medication Name"
+                  value={med.medicationName}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "medication",
+                      idx,
+                      "medicationName",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Dose"
+                  value={med.dose}
+                  onChange={(e) =>
+                    handleArrayChange("medication", idx, "dose", e.target.value)
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Frequency"
+                  value={med.frequency}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "medication",
+                      idx,
+                      "frequency",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="number"
+                  placeholder="Duration (days)"
+                  value={med.duration}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "medication",
+                      idx,
+                      "duration",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Instruction"
+                  value={med.instruction}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "medication",
+                      idx,
+                      "instruction",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Side Effect"
+                  value={med.sideEffect}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "medication",
+                      idx,
+                      "sideEffect",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeArrayField("medication", idx)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addArrayField("medication")}
+              className="bg-gray-300 px-2 py-1 rounded mb-4"
+            >
+              + Add Medication
+            </button>
+          </>
+        )}
+
+        {/* vaccination */}
+        <label className="font-bold block mb-2">Vaccination</label>
+        {!showVaccination ? (
+          <button
+            type="button"
+            onClick={() => setShowVaccination(true)}
+            className="bg-gray-300 px-2 py-1 rounded mb-4"
+          >
+            + Add Vaccination
+          </button>
+        ) : (
+          <>
+            {formData.vaccination.map((vac, idx) => (
+              <div
+                key={`vac-${idx}`}
+                className="mb-4 p-3 border rounded bg-gray-50"
+              >
+                <input
+                  type="text"
+                  placeholder="Vaccine Name"
+                  value={vac.vaccineName}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "vaccination",
+                      idx,
+                      "vaccineName",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+
+                <label className="font-bold block mb-1">Vaccination Date</label>
+                <input
+                  type="date"
+                  value={vac.vaccinationDate}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "vaccination",
+                      idx,
+                      "vaccinationDate",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+
+                <label className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    checked={vac.needNextVac || false}
+                    onChange={(e) =>
+                      handleArrayChange(
+                        "vaccination",
+                        idx,
+                        "needNextVac",
+                        e.target.checked
+                      )
+                    }
+                    className="mr-2"
+                  />
+                  Need Next Vaccination
+                </label>
+
+                {vac.needNextVac && (
+                  <>
+                    <label className="font-bold block mb-1">
+                      Next Vaccination Date
+                    </label>
+                    <input
+                      type="date"
+                      value={vac.nextVacDate}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          "vaccination",
+                          idx,
+                          "nextVacDate",
+                          e.target.value
+                        )
+                      }
+                      className="w-full mb-2 p-2 border rounded"
+                    />
+                  </>
+                )}
+
+                <input
+                  type="text"
+                  placeholder="Observation"
+                  value={vac.observation}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "vaccination",
+                      idx,
+                      "observation",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Notes"
+                  value={vac.notes}
+                  onChange={(e) =>
+                    handleArrayChange(
+                      "vaccination",
+                      idx,
+                      "notes",
+                      e.target.value
+                    )
+                  }
+                  className="w-full mb-2 p-2 border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeArrayField("vaccination", idx)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addArrayField("vaccination")}
+              className="bg-gray-300 px-2 py-1 rounded mb-4"
+            >
+              + Add Vaccination
+            </button>
+          </>
+        )}
+
+        {/* other columns */}
+        <label className="font-bold block mb-1">Treatment Date</label>
+        <input
+          type="date"
+          value={formData.treatDate}
+          onChange={(e) => handleChange("treatDate", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+
+        <label className="flex items-center mb-4">
+          <input
+            type="checkbox"
+            checked={formData.followUp}
+            onChange={(e) => handleChange("followUp", e.target.checked)}
+            className="mr-2"
+          />
+          Need Follow Up
+        </label>
+
+        {formData.followUp && ( // conditional show up
+          <>
+            <label className="font-bold block mb-1">Follow-up Date</label>
+            <input
+              type="date"
+              value={formData.followUpDate}
+              onChange={(e) => handleChange("followUpDate", e.target.value)}
+              className="w-full mb-4 p-2 border rounded"
+            />
+          </>
+        )}
+
+        <input
+          type="text"
+          placeholder="Payment （$AUD）"
+          value={formData.payment}
+          onChange={(e) => handleChange("payment", e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <label className="flex items-center mb-4">
+          <input
+            type="checkbox"
+            checked={formData.isPaid}
+            onChange={(e) => handleChange("isPaid", e.target.checked)}
+            className="mr-2"
+          />
+          Is Paid
+        </label>
+
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
