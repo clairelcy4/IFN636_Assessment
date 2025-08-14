@@ -56,11 +56,11 @@ jobs:
         working-directory: ./backend
         run: |
           touch .env
-          MONGO_URI: MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0
-          JWT_SECRET: JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=
-          PORT: PORT=5002
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
 
-      # test backend
+      # rtest backend
       - name: Run Backend Tests
         working-directory: ./backend
         env:
