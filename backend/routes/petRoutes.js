@@ -1,27 +1,80 @@
 const express = require("express");
+const mongoose = require("mongoose");
+const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 const {
   getPets,
   addPet,
   updatePet,
   deletePet,
+  getPetById,
 } = require("../controllers/petController");
 
-// CRUD API
+router.get("/", protect, getPets);
+router.get(
+  "/:id",
+  protect,
+  async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    next();
+  },
+  getPetById
+);
+router.post("/", protect, addPet);
+router.put(
+  "/:id",
+  protect,
+  async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    next();
+  },
+  updatePet
+);
+
+// GET all
 router.get("/", getPets);
+
+// GET one by ID
+router.get(
+  "/:id",
+  async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    next();
+  },
+  getPetById
+);
+
+// CREATE
 router.post("/", addPet);
-router.put("/:id", updatePet);
-router.delete("/:id", deletePet);
 
-// TEST ONLY
-router.get("/test", (req, res) => {
-  res.json([{ name: "Test Pet", species: "Dog" }]);
-});
+// UPDATE
+router.put(
+  "/:id",
+  async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    next();
+  },
+  updatePet
+);
 
-router.post("/test", (req, res) => {
-  const newPet = req.body;
-  console.log("create new pet profile：", newPet);
-  res.status(201).json({ ...newPet, _id: Date.now().toString() });
-});
-
+// DELETE
+router.delete(
+  "/:id",
+  protect,
+  async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    next();
+  },
+  deletePet
+);
 module.exports = router;

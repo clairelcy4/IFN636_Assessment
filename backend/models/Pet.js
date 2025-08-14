@@ -6,6 +6,10 @@ const petSchema = new mongoose.Schema(
     species: { type: String },
     breed: { type: String },
     age: { type: Number },
+    allergyMed: { type: String },
+    ownerName: { type: String },
+    ownerPhone: { type: String },
+    ownerEmail: { type: String },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
