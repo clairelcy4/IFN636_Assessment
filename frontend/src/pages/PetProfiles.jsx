@@ -81,7 +81,7 @@ const PetProfiles = () => {
       ownerPhone: pet.ownerPhone,
       ownerEmail: pet.ownerEmail,
     });
-    setCurrentPetId(pet.id);
+    setCurrentPetId(pet._id);
     setEditing(true);
   };
 
@@ -164,7 +164,7 @@ const PetProfiles = () => {
 
       <h3 className="text-lg font-bold mt-6">Pet Profile List</h3>
       {pets.map((pet) => (
-        <div key={pet.id} className="bg-gray-100 p-4 my-2 rounded shadow">
+        <div key={pet._id} className="bg-gray-100 p-4 my-2 rounded shadow">
           {pet.name} ({pet.species}), Age: {pet.age}
           <br />
           Allergy Med: {pet.allergyMed}
@@ -178,7 +178,7 @@ const PetProfiles = () => {
               Edit
             </button>
             <button
-              onClick={() => handleDelete(pet.id)}
+              onClick={() => handleDelete(pet._id)}
               className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
             >
               Delete

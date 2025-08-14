@@ -43,20 +43,20 @@ const Appointments = () => {
     fetchAppointments();
   }, [user]);
 
-  // get vet list (for dropdown)
-  useEffect(() => {
-    const fetchVets = async () => {
-      try {
-        const res = await axiosInstance.get("/api/vets", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setVets(res.data);
-      } catch (err) {
-        console.error("Failed to fetch vets");
-      }
-    };
-    fetchVets();
-  }, [user]);
+  // get vet list (for selections labter)
+  // useEffect(() => {
+  //   const fetchVets = async () => {
+  //     try {
+  //       const res = await axiosInstance.get("/api/vets", {
+  //         headers: { Authorization: `Bearer ${user.token}` },
+  //       });
+  //       setVets(res.data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch vets");
+  //     }
+  //   };
+  //   fetchVets();
+  // }, [user]);
 
   // form
   const handleChange = (key, value) => {
@@ -239,8 +239,8 @@ const Appointments = () => {
         </form>
       )}
 
-      {/* vet schedule viewer */}
-      <div className="mb-6">
+      {/* vet schedule viewer - later */}
+      {/* <div className="mb-6">
         <h3 className="text-lg font-bold mb-2">View Vet Schedule</h3>
         <div className="flex items-center space-x-2">
           <select
@@ -268,7 +268,7 @@ const Appointments = () => {
             View Schedule
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* calendar layout */}
       <div className="bg-white p-4 shadow rounded">

@@ -1,34 +1,63 @@
 // testing
-let pets = [];
+// let pets = [];
+const Pet = require("../models/Pet");
 
-const getPets = (req, res) => {
-  res.json(pets);
-};
-
-const addPet = (req, res) => {
-  console.log("AddPet req.body:", req.body); // debug
-  const pet = { id: Date.now().toString(), ...req.body };
-  pets.push(pet);
-  res.status(201).json(pet);
-};
-
-const updatePet = (req, res) => {
-  console.log("UpdatePet req.body:", req.body); // debug
-  const index = pets.findIndex((p) => p.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ message: "Pet not found" });
+// GET all
+const getPets = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+    const pets = await Pet.find({ ownerId: req.user.id });
+    res.json(pets);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-  pets[index] = { ...pets[index], ...req.body };
-  res.json(pets[index]);
 };
 
-const deletePet = (req, res) => {
-  const index = pets.findIndex((p) => p.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ message: "Pet not found" });
+// GET one
+const getPetById = async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) return res.status(404).json({ message: "Pet not found" });
+    res.json(pet);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-  const deletedPet = pets.splice(index, 1);
-  res.json({ message: "Pet deleted", pet: deletedPet });
 };
 
-module.exports = { getPets, addPet, updatePet, deletePet };
+// CREATE
+const addPet = async (req, res) => {
+  try {
+    const pet = await Pet.create({ ...req.body, ownerId: req.user.id });
+    res.status(201).json(pet);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE
+const updatePet = async (req, res) => {
+  try {
+    const pet = await Pet.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!pet) return res.status(404).json({ message: "Pet not found" });
+    res.json(pet);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE
+const deletePet = async (req, res) => {
+  try {
+    const pet = await Pet.findByIdAndDelete(req.params.id);
+    if (!pet) return res.status(404).json({ message: "Pet not found" });
+    res.json({ message: "Pet deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getPets, getPetById, addPet, updatePet, deletePet };
