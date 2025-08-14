@@ -1,12 +1,16 @@
-**Assessment 1**
+**IFN636 Assessment 1**
 
+Student name: Claire Lin
+Student ID: N12379417
+Project name: **31-Pet Clinic Management System**
 Assignment: **Software requirements analysis and design (**Full-Stack CRUD Application Development with DevOps Practices**)**
 
 ---
 
 **Objective**
-
-You have been provided with a starter project that includes user authentication using Node.js, React.js, and MongoDB. Your task is to extend this application by implementing CRUD (Create, Read, Update, Delete) operations of different featuresfor a real-world application of your choice, while following industry best practices such as:
+This is the frontend for the IFN636 Assessment 1.
+Framework: React.js
+Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 
 - **Project Management with JIRA**
 - **Requirement Diagram**, **Block Definition Diagram (**BDD), Parametric Diagram using**SysML**

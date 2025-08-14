@@ -225,9 +225,9 @@ const Treatment = () => {
         const res = await axiosInstance.put(
           `/api/treatments/${editingTreatment._id}`,
           formData,
-          { headers: { Authorization: `Bearer ${user.token}` } }
+          { headers: { Authorization: `Bearer ${user.token}` } } //later- relevant to clinic staff
         );
-        setEditingTreatment(res.data);
+        setEditingTreatment(null);
       } else {
         // CREATE
         await axiosInstance.post("/api/treatments", formData, {
@@ -317,6 +317,7 @@ const Treatment = () => {
         payment: "",
         isPaid: false,
       });
+      navigate("/treatment");
     } catch (error) {
       console.error("Error saving treatment:", error.response?.data || error);
       alert(
