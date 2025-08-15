@@ -19,11 +19,6 @@ const Appointments = () => {
   const [selectedVet, setSelectedVet] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // filter the cancelled appointments on calendar - add viewing archive function later
-  const filteredCalendarEvents = calendarEvents.filter(
-    (event) => event.status !== "Cancelled"
-  );
-
   const [formData, setFormData] = useState({
     appointedBy: "",
     petName: "",
@@ -177,6 +172,8 @@ const Appointments = () => {
           status: a.status,
         }))
     : [];
+  // filter the cancelled appointments on calendar - add viewing archive function later
+  const filteredCalendarEvents = calendarEvents;
 
   return (
     <div className="container mx-auto p-6">
