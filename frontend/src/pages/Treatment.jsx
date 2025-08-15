@@ -54,7 +54,7 @@ const Treatment = () => {
     isPaid: false,
   });
 
-  // get treatment info
+  // get all treatments
   const fetchTreatments = async () => {
     if (!user?.token) {
       console.warn("No token found, cannot fetch treatments");
@@ -64,65 +64,60 @@ const Treatment = () => {
       const res = await axiosInstance.get("/api/treatments", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      const data = res.data.map((t) => ({
-        ...t,
-        diagnosisRecords: t.diagnosisRecords || [
-          {
-            weight: "",
-            temperature: "",
-            symptoms: "",
-            mediExam: "",
-            diagnosis: "",
-          },
-        ],
-        medication: t.medication || [
-          {
-            medicationName: "",
-            dose: "",
-            frequency: "",
-            duration: "",
-            instruction: "",
-            sideEffect: "",
-          },
-        ],
-        vaccination: t.vaccination || [
-          {
-            vaccineName: "",
-            vaccinationDate: "",
-            nextVacDate: "",
-            observation: "",
-            notes: "",
-          },
-        ],
-      }));
-      setTreatments(data);
+      if (Array.isArray(res.data)) {
+        const data = res.data.map((t) => ({
+          ...t,
+          diagnosisRecords: t.diagnosisRecords || [
+            {
+              weight: "",
+              temperature: "",
+              symptoms: "",
+              mediExam: "",
+              diagnosis: "",
+            },
+          ],
+          medication: t.medication || [
+            {
+              medicationName: "",
+              dose: "",
+              frequency: "",
+              duration: "",
+              instruction: "",
+              sideEffect: "",
+            },
+          ],
+          vaccination: t.vaccination || [
+            {
+              vaccineName: "",
+              vaccinationDate: "",
+              nextVacDate: "",
+              observation: "",
+              notes: "",
+            },
+          ],
+        }));
+        setTreatments(data);
+      } else {
+        console.error("Unexpected treatments API response:", res.data);
+        setTreatments([]);
+      }
     } catch (err) {
-      alert("Failed to fetch treatments");
+      console.error("Failed to fetch treatments:", err);
+      alert("Failed to fetch treatments.");
+      setTreatments([]);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
-    const fetchTreatments = async () => {
-      try {
-        const response = await axiosInstance.get("/api/treatments", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        if (Array.isArray(response.data)) {
-          setTreatments(response.data);
-        } else {
-          console.error("Unexpected treatments API response:", response.data);
-          setTreatments([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch treatments:", error);
-        alert("Failed to fetch treatments.");
-        setTreatments([]);
-      } finally {
-        setLoading(false);
+    if (user?.token) {
+      if (treatmentId) {
+        fetchSingleTreatment();
+      } else {
+        fetchTreatments(); //
       }
-    };
-
-    if (user?.token) fetchTreatments();
-  }, [user]);
+    }
+  }, [user, treatmentId]);
 
   const fetchSingleTreatment = async () => {
     try {
@@ -235,17 +230,23 @@ const Treatment = () => {
     try {
       if (editingTreatment) {
         // UPDATE
-        const res = await axiosInstance.put(
+        const response = await axiosInstance.put(
           `/api/treatments/${editingTreatment._id}`,
           formData,
-          { headers: { Authorization: `Bearer ${user.token}` } } //later- relevant to clinic staff
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+        setTreatments(
+          treatments.map((t) =>
+            t._id === editingTreatment._id ? response.data : t
+          )
         );
         setEditingTreatment(null);
       } else {
         // CREATE
-        await axiosInstance.post("/api/treatments", formData, {
+        const response = await axiosInstance.post("/api/treatments", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        setTreatments([...treatments, response.data]);
       }
 
       // REFRESH
