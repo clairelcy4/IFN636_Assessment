@@ -31,7 +31,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get("/api/auth/profile", {
+        const res = await axiosInstance.get("/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(res.data);
@@ -91,7 +91,7 @@ const Profile = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axiosInstance.put("/api/auth/profile", formData, {
+      const res = await axiosInstance.put("/auth/profile", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(res.data);

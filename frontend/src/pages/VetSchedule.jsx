@@ -22,7 +22,7 @@ const VetSchedule = () => {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const res = await axiosInstance.get(`/api/vet-schedule/${vetId}`, {
+        const res = await axiosInstance.get(`/vet-schedule/${vetId}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setSchedules(res.data);
@@ -42,7 +42,7 @@ const VetSchedule = () => {
     try {
       if (editingId) {
         const res = await axiosInstance.put(
-          `/api/vet-schedule/${editingId}`,
+          `/vet-schedule/${editingId}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
@@ -52,7 +52,7 @@ const VetSchedule = () => {
         setEditingId(null);
       } else {
         const res = await axiosInstance.post(
-          "/api/vet-schedule",
+          "/vet-schedule",
           {
             vetId,
             ...formData,
@@ -80,7 +80,7 @@ const VetSchedule = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axiosInstance.delete(`/api/vet-schedule/${id}`, {
+      await axiosInstance.delete(`/vet-schedule/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setSchedules(schedules.filter((s) => s._id !== id));

@@ -19,7 +19,7 @@ const PetProfiles = () => {
 
   const fetchPets = async () => {
     try {
-      const res = await axiosInstance.get("/api/pets", {
+      const res = await axiosInstance.get("/pets", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       if (Array.isArray(res.data)) {
@@ -49,12 +49,12 @@ const PetProfiles = () => {
     e.preventDefault();
     try {
       if (editing && currentPetId) {
-        await axiosInstance.put(`/api/pets/${currentPetId}`, formData, {
+        await axiosInstance.put(`/pets/${currentPetId}`, formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         alert("Pet profile updated successfully");
       } else {
-        await axiosInstance.post("/api/pets", formData, {
+        await axiosInstance.post("/pets", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         alert("Pet profile added successfully");
@@ -93,7 +93,7 @@ const PetProfiles = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this pet?")) return;
     try {
-      await axiosInstance.delete(`/api/pets/${id}`, {
+      await axiosInstance.delete(`/pets/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       alert("Pet profile deleted successfully");
