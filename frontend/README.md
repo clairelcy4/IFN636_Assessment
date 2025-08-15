@@ -20,26 +20,43 @@ It connects to the backend API (Node.js + Express + MongoDB) deployed on AWS EC2
 - **/backend/models** MongoDB schema
 - **/backend/routes** API links
 
-## How to run in local environment
+---
 
-1. `cd frontend` Navigate to "frontend" folder.
-2. `npm install` Install dependencies
-3. `npm start` Runs the app in the development mode.
-   Open [http://localhost:3001](http://localhost:3001) to view it in your browser.
+## How to Run in Local Environment
+1. `cd frontend` – Navigate to the **frontend** folder  
+2. `npm install` – Install dependencies  
+3. `npm start` – Start development server  
+   - Runs at [http://localhost:3001](http://localhost:3001)  
+4. `npm test` – Launch the interactive test runner  
 
-4. `npm test` Launches the test runner in the interactive watch mode.
+---
 
-## How to run in AWS environment
+## How to Run in AWS Environment
 
-1. Go to EC2 website and **Start instancel** of i-04f8c82f9368bb1ba (clairelin)
-2. Push git changes to `main` branch.
-3. Normally, the application is deployed automatically via GitHub Actions workflow (ci.yml).
-4. If manual deployment is needed, run the following command:
-   - Use terminal SSH into AWS EC2 instance.
-   - `cd ~/www/frontend`
-   - `yarn install`
-   - `sudo rm -rf ./build`
-   - `yarn run build`
-   - `pm2 serve build/ 3000 --name "Frontend"--spa`
-   - `pm2 status`
-   - `pm2 save`
+### Automatic Deployment (Default)
+1. Go to AWS EC2 console and **Start instance**: `i-04f8c82f9368bb1ba` (clairelin)  
+2. Push changes to the `main` branch  
+3. Deployment will run automatically via GitHub Actions workflow (`ci.yml`)
+
+### Manual Deployment (Fallback)
+If CI/CD deployment fails or manual deployment is required:
+
+```bash
+# SSH into AWS EC2 instance
+cd ~/www/frontend
+
+# Install dependencies
+yarn install
+
+# Remove old build files
+sudo rm -rf ./build
+
+# Build production files
+yarn run build
+
+# Serve with PM2
+pm2 serve build/ 3000 --name "Frontend" --spa
+
+# Check and save PM2 process list
+pm2 status
+pm2 save
