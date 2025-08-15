@@ -22,6 +22,7 @@ Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 1. [GitHub](https://github.com/clairelcy4/IFN636_Assessment)
 2. Jira: Refer to the report uploaded on Canvas
 3. Public IP: Refer to the report uploaded on Canvas
+4. Test account: Register a new one on the website
 
 ---
 
