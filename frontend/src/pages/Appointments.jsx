@@ -259,7 +259,8 @@ const Appointments = () => {
             </form>
           )}
 
-          <div className="mb-6">
+          {/* extend later! */}
+          {/* <div className="mb-6">
             <h3 className="text-lg font-bold mb-2">View Vet Schedule</h3>
             <div className="flex items-center space-x-2">
               <select
@@ -288,7 +289,7 @@ const Appointments = () => {
                 View Schedule
               </button>
             </div>
-          </div>
+          </div> */}
 
           <div className="bg-white p-4 shadow rounded">
             <h2 className="text-xl font-bold mb-4">Appointments Calendar</h2>
