@@ -36,9 +36,8 @@ jobs:
 
       # install backend
       - name: Install Backend Dependencies
-        run: |
-          cd backend
-          npm install
+        working-directory: /home/ubuntu/www/backend
+        run: npm install
 
       # install backend .env for ec2
       - name: Create .env for backend
@@ -50,9 +49,9 @@ jobs:
 
       # install frontend
       - name: Install Frontend Dependencies
-        working-directory: ./frontend
+        working-directory: /home/ubuntu/www/frontend
         run: |
-          sudo rm -rf ./build
+          sudo rm -rf build
           npm install
 
       # .env.local for EC2
