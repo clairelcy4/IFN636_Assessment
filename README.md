@@ -1,8 +1,8 @@
 **IFN636 Assessment 1**
 
-Student name: Claire Lin
-Student ID: N12379417
-Project name: **31-Pet Clinic Management System**
+Student name: Claire Lin\
+Student ID: N12379417\
+Project name: **31-Pet Clinic Management System**\
 Assignment: **Software requirements analysis and design (**Full-Stack CRUD Application Development with DevOps Practices**)**
 
 ---
