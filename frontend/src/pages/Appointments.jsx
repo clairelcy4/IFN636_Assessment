@@ -33,7 +33,7 @@ const Appointments = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await axiosInstance.get("/api/appointments", {
+        const response = await axiosInstance.get("/appointments", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         if (Array.isArray(response.data)) {
@@ -57,7 +57,7 @@ const Appointments = () => {
   useEffect(() => {
     const fetchVets = async () => {
       try {
-        const res = await axiosInstance.get("/api/vets", {
+        const res = await axiosInstance.get("/vets", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         if (Array.isArray(res.data)) {
@@ -100,7 +100,7 @@ const Appointments = () => {
     try {
       if (editingAppointment) {
         const response = await axiosInstance.put(
-          `/api/appointments/${editingAppointment._id}`,
+          `/appointments/${editingAppointment._id}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
@@ -111,11 +111,9 @@ const Appointments = () => {
         );
         setEditingAppointment(null);
       } else {
-        const response = await axiosInstance.post(
-          "/api/appointments",
-          formData,
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const response = await axiosInstance.post("/appointments", formData, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
         setAppointments([...appointments, response.data]);
       }
 
@@ -150,7 +148,7 @@ const Appointments = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axiosInstance.delete(`/api/appointments/${id}`, {
+      await axiosInstance.delete(`/appointments/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setAppointments(appointments.filter((a) => a._id !== id));

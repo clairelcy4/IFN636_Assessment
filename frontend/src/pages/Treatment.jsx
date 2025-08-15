@@ -61,7 +61,7 @@ const Treatment = () => {
       return;
     }
     try {
-      const res = await axiosInstance.get("/api/treatments", {
+      const res = await axiosInstance.get("/treatments", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       if (Array.isArray(res.data)) {
@@ -121,7 +121,7 @@ const Treatment = () => {
 
   const fetchSingleTreatment = async () => {
     try {
-      const res = await axiosInstance.get(`/api/treatments/${treatmentId}`, {
+      const res = await axiosInstance.get(`/treatments/${treatmentId}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setEditingTreatment(res.data);
@@ -231,7 +231,7 @@ const Treatment = () => {
       if (editingTreatment) {
         // UPDATE
         const response = await axiosInstance.put(
-          `/api/treatments/${editingTreatment._id}`,
+          `/treatments/${editingTreatment._id}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
@@ -243,7 +243,7 @@ const Treatment = () => {
         setEditingTreatment(null);
       } else {
         // CREATE
-        const response = await axiosInstance.post("/api/treatments", formData, {
+        const response = await axiosInstance.post("/treatments", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setTreatments([...treatments, response.data]);
@@ -255,7 +255,7 @@ const Treatment = () => {
       // back to list
       navigate("/treatment");
 
-      const res = await axiosInstance.get("/api/treatments", {
+      const res = await axiosInstance.get("/treatments", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       const data = res.data.map((t) => ({
@@ -350,7 +350,7 @@ const Treatment = () => {
   // DELETE
   const handleDelete = async (id) => {
     try {
-      await axiosInstance.delete(`/api/treatments/${id}`, {
+      await axiosInstance.delete(`/treatments/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setTreatments(treatments.filter((t) => t._id !== id));
