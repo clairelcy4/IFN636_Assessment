@@ -23,24 +23,30 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Print Env Secret (for debug only)
-        env:
-          MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
-          JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
-          PORT: "5002"
-        run: |
-          echo "MONGO_URI is set"
-          echo "JWT_SECRET is set"
-          echo "PORT is set"
-
       # stop old one
       - run: pm2 stop all || true
+
+      # ensure frontend and backend files appear
+      - name: Copy project files to /home/ubuntu/www
+        run: |
+          mkdir -p /home/ubuntu/www
+          rm -rf /home/ubuntu/www/*
+          cp -r backend /home/ubuntu/www/
+          cp -r frontend /home/ubuntu/www/
 
       # install backend
       - name: Install Backend Dependencies
         run: |
           cd backend
           npm install
+
+      # install backend .env for ec2
+      - name: Create .env for backend
+        working-directory: /home/ubuntu/www/backend
+        run: |
+          echo "MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0" > .env
+          echo "JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=" >> .env
+          echo "PORT=5001" >> .env
 
       # install frontend
       - name: Install Frontend Dependencies
@@ -79,14 +85,6 @@ jobs:
         run: |
           CI=false npm run build --verbose
 
-      # create .env for backend
-      - name: Create .env for backend
-        working-directory: ./backend
-        run: |
-          echo "MONGO_URI=mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0" > .env
-          echo "JWT_SECRET=2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs=" >> .env
-          echo "PORT=5002" >> .env
-
       # test backend
       - name: Run Backend Tests
         working-directory: ./backend
@@ -103,8 +101,10 @@ jobs:
       # start services
       - name: Start backend & frontend
         run: |
-          pm2 start "./backend/server.js" --name="backend"
-          pm2 serve ./frontend/build 3000 --name "frontend" --spa
+          cd /home/ubuntu/www/backend
+          pm2 start "npm run start" --name="backend"
+          cd /home/ubuntu/www/frontend
+          pm2 serve build/ 3000 --name "frontend" --spa
 
       # save PM2 process
       - name: Save PM2 process list
