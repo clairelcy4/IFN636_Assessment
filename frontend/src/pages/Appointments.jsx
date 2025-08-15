@@ -59,7 +59,6 @@ const Appointments = () => {
   }, [user]);
 
   // get vet list (for dropdown)
-  // get vet list (for dropdown)
   useEffect(() => {
     const fetchVets = async () => {
       try {
@@ -173,6 +172,7 @@ const Appointments = () => {
         start: new Date(a.appointDate),
         end: new Date(new Date(a.appointDate).getTime() + a.duration * 60000),
         allDay: false,
+        status: a.status,
       }))
     : [];
 
@@ -296,7 +296,7 @@ const Appointments = () => {
             {calendarEvents.length > 0 ? (
               <Calendar
                 localizer={localizer}
-                events={calendarEvents}
+                events={filteredCalendarEvents}
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: 500 }}
