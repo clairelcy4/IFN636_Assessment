@@ -49,6 +49,14 @@ jobs:
           sudo rm -rf ./build
           yarn install
 
+      # .env.local for EC2
+      - name: Create .env.local for frontend
+        working-directory: ./frontend
+        run: |
+          EC2_IP=$(curl -s ifconfig.me)
+          echo "REACT_APP_API_URL=http://$EC2_IP:5002" > .env.local
+          echo "Generated .env.local with REACT_APP_API_URL=http://$EC2_IP:5002"
+
       # add swap
       - name: Create Swap Space (1.5)
         run: |
