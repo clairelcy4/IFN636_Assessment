@@ -24,7 +24,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       # stop old one
-      - run: pm2 stop all || true
+      - run: pm2 delete all || true
 
       # ensure frontend and backend files appear
       - name: Copy project files to /home/ubuntu/www
