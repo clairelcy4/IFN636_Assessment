@@ -1,50 +1,26 @@
-const mongoose = require("mongoose");
+const express = require("express");
+const router = express.Router();
+const Treatment = require("../models/Treatment");
 
-const treatmentSchema = new mongoose.Schema({
-  petName: { type: String, required: true },
-  vetName: { type: String, required: true },
-  nurseName: { type: String },
-  diagnosisRecords: [
-    {
-      weight: Number,
-      temperature: Number,
-      symptoms: String,
-      mediExam: String,
-      diagnosis: String,
-    },
-  ],
-  medication: [
-    {
-      medicationName: String,
-      dose: Number,
-      frequency: String,
-      duration: Number,
-      instruction: String,
-      sideEffect: String,
-    },
-  ],
-  vaccination: [
-    {
-      vaccineName: String,
-      vaccinationDate: Date,
-      needNextVac: Boolean,
-      nextVacDate: Date,
-      observation: String,
-      notes: String,
-    },
-  ],
-  treatDate: Date,
-  followUp: Boolean,
-  followUpDate: Date,
-  payment: String,
-  isPaid: Boolean,
-
-  // relationship with appointment
-  appointmentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Appointment",
-    required: true,
-  },
+// CREATE
+router.post("/", async (req, res) => {
+  try {
+    const treatment = new Treatment(req.body);
+    const saved = await treatment.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
-module.exports = mongoose.model("Treatment", treatmentSchema);
+// READ
+router.get("/", async (req, res) => {
+  try {
+    const treatments = await Treatment.find();
+    res.json(treatments);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;
