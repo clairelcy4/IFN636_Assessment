@@ -47,7 +47,7 @@ jobs:
         working-directory: ./frontend
         run: |
           sudo rm -rf ./build
-          yarn install
+          npm install
 
       # .env.local for EC2
       - name: Create .env.local for frontend
@@ -77,7 +77,7 @@ jobs:
       - name: Build Frontend
         working-directory: ./frontend
         run: |
-          CI=false yarn build --verbose
+          CI=false npm run build --verbose
 
       # create .env for backend
       - name: Create .env for backend
