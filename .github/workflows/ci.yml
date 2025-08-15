@@ -56,11 +56,11 @@ jobs:
 
       # .env.local for EC2
       - name: Create .env.local for frontend
-        working-directory: ./frontend
+        working-directory: /home/ubuntu/www/frontend
         run: |
           EC2_IP=$(curl -s ifconfig.me)
-          echo "REACT_APP_API_URL=http://$EC2_IP:5002" > .env.local
-          echo "Generated .env.local with REACT_APP_API_URL=http://$EC2_IP:5002"
+          echo "REACT_APP_API_URL=http://$EC2_IP:5001" > .env.local
+          echo "Generated .env.local with REACT_APP_API_URL=http://$EC2_IP:5001"
 
       # add swap
       - name: Create Swap Space (1.5)
@@ -80,17 +80,17 @@ jobs:
 
       # build frontend
       - name: Build Frontend
-        working-directory: ./frontend
+        working-directory: /home/ubuntu/www/frontend
         run: |
           CI=false npm run build --verbose
 
       # test backend
       - name: Run Backend Tests
-        working-directory: ./backend
+        working-directory: /home/ubuntu/www/backend
         env:
           MONGO_URI: "mongodb+srv://qut636_1:1234@cluster0.nspoova.mongodb.net/petclinic?retryWrites=true&w=majority&appName=Cluster0"
           JWT_SECRET: "2J8zqkP7VN6bxzg+Wy7DQZsd3Yx8mF3Bl0kch6HYtFs="
-          PORT: "5002"
+          PORT: "5001"
         run: npm test
 
       # install pm2
