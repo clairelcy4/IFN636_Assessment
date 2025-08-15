@@ -74,8 +74,8 @@ jobs:
       - name: Build Frontend
         working-directory: /home/ubuntu/www/frontend
         run: |
-          EC2_IP=$(curl -s ifconfig.me)
-          REACT_APP_API_URL=http://$EC2_IP:5001 CI=false npm run build --verbose
+          export REACT_APP_API_URL=http://$(curl -s ifconfig.me):5001
+          CI=false npm run build --verbose
 
       # test backend
       - name: Run Backend Tests
