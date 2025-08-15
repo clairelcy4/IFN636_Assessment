@@ -166,14 +166,16 @@ const Appointments = () => {
 
   // transfer data to calendar format
   const calendarEvents = Array.isArray(appointments)
-    ? appointments.map((a) => ({
-        id: a._id,
-        title: `${a.petName} - ${a.vetName}`,
-        start: new Date(a.appointDate),
-        end: new Date(new Date(a.appointDate).getTime() + a.duration * 60000),
-        allDay: false,
-        status: a.status,
-      }))
+    ? appointments
+        .filter((a) => a.status !== "Cancelled") //hide cancelled appointments - extend viewing archived ones later
+        .map((a) => ({
+          id: a._id,
+          title: `${a.petName} - ${a.vetName}`,
+          start: new Date(a.appointDate),
+          end: new Date(new Date(a.appointDate).getTime() + a.duration * 60000),
+          allDay: false,
+          status: a.status,
+        }))
     : [];
 
   return (
