@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 const vetScheduleRoutes = require("./routes/vetScheduleRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -19,6 +20,11 @@ app.use("/api/pets", petRoutes);
 app.use("/api/treatments", treatmentRoutes);
 app.use("/api/vet-schedules", vetScheduleRoutes);
 app.use("/api/appointments", appointmentsRouter);
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
 
 if (process.env.NODE_ENV !== "test") {
   connectDB();
