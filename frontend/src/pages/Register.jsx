@@ -18,9 +18,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await register(formData); // 從 AuthContext 呼叫後端
+      const data = await register(formData);
       console.log("Register success:", data);
-      navigate("/"); // 註冊成功導回首頁
+      navigate("/login"); // go to login page afer register
     } catch (err) {
       alert(err.message || "Registration failed");
     }
