@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import axiosInstance from "../axiosConfig";
 
 const AuthContext = createContext();
 
@@ -24,16 +25,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const res = await fetch("http://localhost:5001/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Registration failed");
-
-      saveUserToLocalStorage(data);
-      return data;
+      const res = await axiosInstance.post("/auth/register", userData);
+      console.log("AuthContext register response:", res.data); // debug why failed
+      saveUserToLocalStorage(res.data);
+      return res.data;
     } catch (err) {
       console.error("Registration error:", err);
       throw err;
@@ -42,16 +37,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userData) => {
     try {
-      const res = await fetch("http://localhost:5001/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
-
-      saveUserToLocalStorage(data);
-      return data;
+      const res = await axiosInstance.post("/auth/login", userData);
+      console.log("AuthContext login response:", res.data); // debug why failed
+      saveUserToLocalStorage(res.data);
+      return res.data;
     } catch (err) {
       console.error("Login error:", err);
       throw err;
