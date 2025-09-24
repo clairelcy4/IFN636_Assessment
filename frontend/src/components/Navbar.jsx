@@ -24,7 +24,7 @@ const Navbar = () => {
       <div>
         {user ? (
           <>
-            <Link to="/pet" className="mr-4">
+            <Link to="/pets" className="mr-4">
               Pet Profiles
             </Link>{" "}
             <Link to="/appointments" className="mr-4">

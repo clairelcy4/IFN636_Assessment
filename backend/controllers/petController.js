@@ -1,63 +1,79 @@
-// testing
-// let pets = [];
+// backend/controllers/petController.js
 const Pet = require("../models/Pet");
+
+// Fields vets/nurses can see (adjust to your schema)
+const REDUCED_FIELDS =
+  "name species breed sex age weight photo lastVisit vaccineSummary allergies";
 
 // GET all
 const getPets = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-    const pets = await Pet.find({ ownerId: req.user.id });
-    res.json(pets);
+    const select = req.user.role === "staff" ? undefined : REDUCED_FIELDS;
+
+    // Keep your existing behavior (owner-scoped).
+    // If staff should see ALL pets, change filter to {} for staff.
+    const filter =
+      req.user.role === "staff" ? { ownerId: req.user.id } : { ownerId: req.user.id };
+
+    const pets = await Pet.find(filter).select(select);
+    return res.json(pets);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
 // GET one
 const getPetById = async (req, res) => {
   try {
-    const pet = await Pet.findById(req.params.id);
+    const select = req.user.role === "staff" ? undefined : REDUCED_FIELDS;
+    const pet = await Pet.findById(req.params.id).select(select);
     if (!pet) return res.status(404).json({ message: "Pet not found" });
-    res.json(pet);
+
+    // Enforce ownership for non-staff (optional; mirrors your list behavior)
+    if (String(pet.ownerId) !== String(req.user.id) && req.user.role !== "staff") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    return res.json(pet);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-// CREATE
+// CREATE (staff only via router)
 const addPet = async (req, res) => {
   try {
     const pet = await Pet.create({ ...req.body, ownerId: req.user.id });
-    res.status(201).json(pet);
+    return res.status(201).json(pet);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-// UPDATE
+// UPDATE (staff only via router)
 const updatePet = async (req, res) => {
   try {
     const pet = await Pet.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: true,
     });
     if (!pet) return res.status(404).json({ message: "Pet not found" });
-    res.json(pet);
+    return res.json(pet);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-// DELETE
+// DELETE (staff only via router)
 const deletePet = async (req, res) => {
   try {
     const pet = await Pet.findByIdAndDelete(req.params.id);
     if (!pet) return res.status(404).json({ message: "Pet not found" });
-    res.json({ message: "Pet deleted" });
+    return res.json({ message: "Pet deleted" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
 module.exports = { getPets, getPetById, addPet, updatePet, deletePet };
+
