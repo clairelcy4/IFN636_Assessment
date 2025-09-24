@@ -23,12 +23,12 @@ let defaultStrategy = "buffer";
 // Store appointments in-memory (for demo; in real app this should use DB)
 let appointments = [];
 
-// ✅ Get all appointments
+//  Get all appointments
 router.get("/", (req, res) => {
   res.json(appointments);
 });
 
-// ✅ Set default strategy at runtime
+//  Set default strategy at runtime
 router.post("/set-strategy", (req, res) => {
   const { type } = req.body;
   if (!strategies[type]) {
@@ -38,12 +38,12 @@ router.post("/set-strategy", (req, res) => {
   res.json({ message: `Strategy switched to ${type}` });
 });
 
-// ✅ Get current strategy
+//  Get current strategy
 router.get("/current-strategy", (req, res) => {
   res.json({ currentStrategy: defaultStrategy });
 });
 
-// ✅ Create appointment
+//  Create appointment
 router.post("/", async (req, res) => {
   try {
     const newAppointment = { _id: Date.now().toString(), ...req.body };
@@ -67,7 +67,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ Update appointment
+//  Update appointment
 router.put("/:id", (req, res) => {
   const { id } = req.params;
   appointments = appointments.map((a) =>
@@ -77,7 +77,7 @@ router.put("/:id", (req, res) => {
   res.json(updated);
 });
 
-// ✅ Delete appointment
+// Delete appointment
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   appointments = appointments.filter((a) => a._id !== id);
