@@ -1,3 +1,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* --- Overrides by Claire --- */
+
+/* font style */
+body {
+  font-family: Georgia, serif !important;
+}
+
+/* navbar color */
+.bg-blue-600 {
+  background-color: #19183b !important;
+}
+
+/* button color */
+.logo:hover {
+  color: #48b3af;
+}
+.bg-red-500 {
+  background-color: #b91c1c;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+}
+.hover\:bg-red-700:hover {
+  background-color: #dc143c !important;
+}
+.bg-green-500 {
+  background-color: #48b3af;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+}
+.bg-blue-500 {
+  background-color: #3396d3;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+}
+.mr-4:hover {
+  color: #48b3af;
+  font-style: italic;
+}
+
+/* input frame */
+input,
+select,
+textarea {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(99, 122, 185, 0.3);
+  border-color: #637ab9;
+  outline: none;
+}
