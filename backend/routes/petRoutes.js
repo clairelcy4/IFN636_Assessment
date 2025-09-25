@@ -1,7 +1,7 @@
+// backend/routes/petRoutes.js
 const express = require("express");
 const mongoose = require("mongoose");
-const { protect } = require("../middleware/authMiddleware");
-const router = express.Router();
+const { protect, authorize } = require("../middleware/authMiddleware");
 const {
   getPets,
   addPet,
@@ -10,71 +10,33 @@ const {
   getPetById,
 } = require("../controllers/petController");
 
-router.get("/", protect, getPets);
-router.get(
-  "/:id",
-  protect,
-  async (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    next();
-  },
-  getPetById
-);
-router.post("/", protect, addPet);
-router.put(
-  "/:id",
-  protect,
-  async (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    next();
-  },
-  updatePet
-);
+const router = express.Router();
 
-// GET all
+// Reusable ObjectId validator
+const validateObjectId = (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+  next();
+};
+
+// All routes require a valid JWT
+router.use(protect);
+
+// READ: list all pets (scoped in controller)
 router.get("/", getPets);
 
-// GET one by ID
-router.get(
-  "/:id",
-  async (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    next();
-  },
-  getPetById
-);
+// READ: single pet
+router.get("/:id", validateObjectId, getPetById);
 
-// CREATE
-router.post("/", addPet);
+// CREATE: staff only
+router.post("/", authorize("staff"), addPet);
 
-// UPDATE
-router.put(
-  "/:id",
-  async (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    next();
-  },
-  updatePet
-);
+// UPDATE: staff only
+router.put("/:id", authorize("staff"), validateObjectId, updatePet);
 
-// DELETE
-router.delete(
-  "/:id",
-  protect,
-  async (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    next();
-  },
-  deletePet
-);
+// DELETE: staff only
+router.delete("/:id", authorize("staff"), validateObjectId, deletePet);
+
 module.exports = router;
+
