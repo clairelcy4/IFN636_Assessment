@@ -6,13 +6,14 @@
 //   headers: { "Content-Type": "application/json" },
 // });
 
-// export default axiosInstance;
-
+// frontend/src/axiosConfig.jsx
 import axios from "axios";
 
-const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL + "/api",
+// CRA proxy in package.json points to http://localhost:5001
+// So use a relative base here and CRA will forward.
+const api = axios.create({
+  baseURL: "/api", // <-- important
   headers: { "Content-Type": "application/json" },
 });
 
-export default axiosInstance;
+export default api;
