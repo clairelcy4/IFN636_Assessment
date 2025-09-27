@@ -1,0 +1,214 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 4,
+    "passes": 0,
+    "pending": 0,
+    "failures": 4,
+    "start": "2025-09-27T04:20:44.223Z",
+    "end": "2025-09-27T04:20:44.230Z",
+    "duration": 7,
+    "testsRegistered": 4,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "611f304d-f4a1-4ef7-8d73-4affaf8e24cf",
+      "title": "",
+      "fullFile": "",
+      "file": "",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+          "title": "Unit Test - Treatment Controllers",
+          "fullFile": "/Users/clairelin/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/202507_Y1S2/IFN636_Software Life Cycle Management/Assessment 1/sdlapps/backend/test/unit test_freatment records.js",
+          "file": "/test/unit test_freatment records.js",
+          "beforeHooks": [
+            {
+              "title": "\"before each\" hook in \"Unit Test - Treatment Controllers\"",
+              "fullTitle": "Unit Test - Treatment Controllers \"before each\" hook in \"Unit Test - Treatment Controllers\"",
+              "timedOut": false,
+              "duration": 0,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "sandbox = sinon.createSandbox();\n// 模擬 Express 的 req/res\nreq = { body: {}, params: {} };\nres = {\n  status: sandbox.stub().returnsThis(),\n  json: sandbox.stub(),\n};",
+              "err": {},
+              "uuid": "8e43be22-228d-4217-b4c8-352ccb637d32",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after each\" hook in \"Unit Test - Treatment Controllers\"",
+              "fullTitle": "Unit Test - Treatment Controllers \"after each\" hook in \"Unit Test - Treatment Controllers\"",
+              "timedOut": false,
+              "duration": 0,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "sandbox.restore();",
+              "err": {},
+              "uuid": "7ed16877-a290-44df-a079-cffd930be682",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "should return all treatments",
+              "fullTitle": "Unit Test - Treatment Controllers should return all treatments",
+              "timedOut": false,
+              "duration": 0,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "const fakeData = [{ petName: \"Lucky\", vetName: \"Dr. A\" }];\nsandbox.stub(Treatment, \"find\").resolves(fakeData);\nawait getTreatments(req, res);\nexpect(res.status.calledWith(200)).to.be.true;\nexpect(res.json.calledWith(fakeData)).to.be.true;",
+              "err": {
+                "message": "TypeError: Cannot stub non-existent property find",
+                "estack": "TypeError: Cannot stub non-existent property find\n    at Function.stub (node_modules/sinon/lib/sinon/stub.js:82:15)\n    at Sandbox.stub (node_modules/sinon/lib/sinon/sandbox.js:454:39)\n    at Context.<anonymous> (test/unit test_freatment records.js:42:13)\n    at process.processImmediate (node:internal/timers:485:21)",
+                "diff": null
+              },
+              "uuid": "9645b0b8-bc69-4843-bd10-0c3d791553da",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should add a new treatment",
+              "fullTitle": "Unit Test - Treatment Controllers should add a new treatment",
+              "timedOut": false,
+              "duration": 0,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "req.body = { petName: \"Milo\", vetName: \"Dr. B\" };\nconst fakeTreatment = { ...req.body, _id: \"123\" };\nsandbox.stub(Treatment.prototype, \"save\").resolves(fakeTreatment);\nawait addTreatment(req, res);\nexpect(res.status.calledWith(201)).to.be.true;\nexpect(res.json.calledWith(fakeTreatment)).to.be.true;",
+              "err": {
+                "message": "TypeError: Cannot stub non-existent property save",
+                "estack": "TypeError: Cannot stub non-existent property save\n    at Function.stub (node_modules/sinon/lib/sinon/stub.js:82:15)\n    at Sandbox.stub (node_modules/sinon/lib/sinon/sandbox.js:454:39)\n    at Context.<anonymous> (test/unit test_freatment records.js:58:13)\n    at process.processImmediate (node:internal/timers:485:21)",
+                "diff": null
+              },
+              "uuid": "f4fdf144-2d9a-4eb3-a1d8-f98dcaf4b60b",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should update a treatment",
+              "fullTitle": "Unit Test - Treatment Controllers should update a treatment",
+              "timedOut": false,
+              "duration": 0,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "req.params.id = \"123\";\nreq.body = { vetName: \"Dr. Updated\" };\nconst fakeUpdated = {\n  _id: \"123\",\n  petName: \"Lucky\",\n  vetName: \"Dr. Updated\",\n};\nsandbox.stub(Treatment, \"findByIdAndUpdate\").resolves(fakeUpdated);\nawait updateTreatment(req, res);\nexpect(res.status.calledWith(200)).to.be.true;\nexpect(res.json.calledWith(fakeUpdated)).to.be.true;",
+              "err": {
+                "message": "TypeError: Cannot stub non-existent property findByIdAndUpdate",
+                "estack": "TypeError: Cannot stub non-existent property findByIdAndUpdate\n    at Function.stub (node_modules/sinon/lib/sinon/stub.js:82:15)\n    at Sandbox.stub (node_modules/sinon/lib/sinon/sandbox.js:454:39)\n    at Context.<anonymous> (test/unit test_freatment records.js:79:13)\n    at process.processImmediate (node:internal/timers:485:21)",
+                "diff": null
+              },
+              "uuid": "b3ce4b9e-13a1-49ea-970e-1c7d9dbb5f0d",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should delete a treatment",
+              "fullTitle": "Unit Test - Treatment Controllers should delete a treatment",
+              "timedOut": false,
+              "duration": 0,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "req.params.id = \"123\";\nsandbox.stub(Treatment, \"findByIdAndDelete\").resolves({ _id: \"123\" });\nawait deleteTreatment(req, res);\nexpect(res.status.calledWith(200)).to.be.true;\nexpect(res.json.calledWithMatch({ message: \"Treatment deleted\" })).to.be\n  .true;",
+              "err": {
+                "message": "TypeError: Cannot stub non-existent property findByIdAndDelete",
+                "estack": "TypeError: Cannot stub non-existent property findByIdAndDelete\n    at Function.stub (node_modules/sinon/lib/sinon/stub.js:82:15)\n    at Sandbox.stub (node_modules/sinon/lib/sinon/sandbox.js:454:39)\n    at Context.<anonymous> (test/unit test_freatment records.js:94:13)\n    at process.processImmediate (node:internal/timers:485:21)",
+                "diff": null
+              },
+              "uuid": "dcf5b7bd-eea4-4fb7-8974-4e3df29ea3b8",
+              "parentUUID": "44945119-08dd-4e3c-a21b-a09a2dc096bd",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "9645b0b8-bc69-4843-bd10-0c3d791553da",
+            "f4fdf144-2d9a-4eb3-a1d8-f98dcaf4b60b",
+            "b3ce4b9e-13a1-49ea-970e-1c7d9dbb5f0d",
+            "dcf5b7bd-eea4-4fb7-8974-4e3df29ea3b8"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "11.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "6.3.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "mochawesome-report",
+        "reportFilename": "mochawesome"
+      },
+      "version": "5.2.0"
+    }
+  }
+}
