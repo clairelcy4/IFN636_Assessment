@@ -8,7 +8,7 @@ chai.use(chaiHttp);
 describe("Appointments API with Strategies", () => {
   let createdId;
 
-  // ✅ Strict Strategy
+  //  Strict Strategy
   it("should create appointment under strict strategy", (done) => {
     chai.request(server)
       .post("/api/appointments")
@@ -48,7 +48,7 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  // ✅ Buffer Strategy
+  //  Buffer Strategy
   it("should reject appointments within buffer time", (done) => {
     chai.request(server)
       .post("/api/appointments")
@@ -68,7 +68,7 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  // ✅ Relaxed Strategy
+  //  Relaxed Strategy
   it("should allow overlapping appointment under relaxed strategy", (done) => {
     chai.request(server)
       .post("/api/appointments")
@@ -88,7 +88,7 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  // ✅ Priority Strategy
+  // Priority Strategy
   it("should allow emergency appointment even if overlapping", (done) => {
     chai.request(server)
       .post("/api/appointments")
@@ -108,7 +108,7 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  // ✅ Flexible Strategy
+  // Flexible Strategy
   it("should allow small overlaps under flexible strategy", (done) => {
     chai.request(server)
       .post("/api/appointments")
@@ -147,7 +147,7 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  // ✅ Clean up
+  // Clean up
   it("should delete appointment", (done) => {
     chai.request(server)
       .delete(`/api/appointments/${createdId}`)
