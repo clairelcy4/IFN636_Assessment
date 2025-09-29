@@ -19,7 +19,7 @@ const Login = () => {
     try {
       const data = await login(formData);
       console.log("Login success:", data);
-      navigate("/appointments"); // redirect to Appointments
+      navigate("/homepage"); // redirect to homepage
     } catch (err) {
       alert(err.message || "Login failed. Please try again.");
     }
