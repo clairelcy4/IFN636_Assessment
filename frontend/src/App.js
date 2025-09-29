@@ -8,14 +8,16 @@ import Appointments from "./pages/Appointments";
 import PetProfiles from "./pages/PetProfiles"; // ← switcher (staff vs read-only)
 import Treatment from "./pages/Treatment";
 import VetSchedule from "./pages/VetSchedule";
-import Homepage from "./pages/Homepage";   
+import Homepage from "./pages/Homepage";
 
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Homepage />} /> 
+        {/* before login */}
+        <Route path="/" element={<Login />} />
+        {/* after login? */}
         <Route path="/homepage" element={<Homepage />} />
 
         <Route path="/login" element={<Login />} />
@@ -27,14 +29,14 @@ function App() {
         <Route path="/treatment/:treatmentId" element={<Treatment />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/vet/:vetId/schedule" element={<VetSchedule />} />
-        
-        <Route path="*" element={<div style={{ padding: 24 }}>Not Found</div>} />
+
+        <Route
+          path="*"
+          element={<div style={{ padding: 24 }}>Not Found</div>}
+        />
       </Routes>
     </Router>
   );
 }
 
-
-
 export default App;
-
