@@ -19,6 +19,7 @@ Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 ---
 
 **Access**
+
 1. [GitHub](https://github.com/clairelcy4/IFN636_Assessment)
 2. Jira: Refer to the report uploaded on Canvas
 3. Public IP: Refer to the report uploaded on Canvas
@@ -29,25 +30,31 @@ Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 **Development Requirement**
 
 1. Prerequisites
-  - Node.js v22+
-  - npm
-  - MongoDB
-  - AWS EC2 instance (QUT account)
+
+- Node.js v22+
+- npm
+- MongoDB
+- AWS EC2 instance (QUT account)
 
 2. Local environmnet setup
-  - backend
-    ```bash
-    cd backend
-    cp .env.example .env  # Add MONGO_URI, JWT_SECRET, PORT
-    npm install
-    npm run dev
-    ```
-  - frontend
-    ```bash
-    cd frontend
-    npm install
-    npm start
-    ```
+
+- root file
+  npm install bcryptjs
+  npm install --save-dev cross-env
+- backend
+  ```bash
+  cd backend
+  cp .env.example .env  # Add MONGO_URI, JWT_SECRET, PORT
+  npm install
+  npm run dev
+  ```
+- frontend
+  ```bash
+  cd frontend
+  npm install
+  npm start
+  ```
+
 3. EC2 environmnet setup - CI/CD workflow
    The CI/CD pipeline is implemented in .github/workflows/ci.yml and runs automatically on push to the main branch.
    - Continuous Integration (CI)

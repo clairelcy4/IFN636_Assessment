@@ -5,24 +5,35 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
-import PetProfiles from "./pages/PetProfiles";
+import PetProfiles from "./pages/PetProfiles"; // ← switcher (staff vs read-only)
 import Treatment from "./pages/Treatment";
 import VetSchedule from "./pages/VetSchedule";
+import Homepage from "./pages/Homepage";
 
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Navigate to="/register" />} />
+        {/* before login */}
+        <Route path="/" element={<Login />} />
+        {/* after login? */}
+        <Route path="/homepage" element={<Homepage />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pet" element={<PetProfiles />} />
+
+        <Route path="/pets" element={<PetProfiles />} />
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/treatment" element={<Treatment />} />
         <Route path="/treatment/:treatmentId" element={<Treatment />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/vet/:vetId/schedule" element={<VetSchedule />} />
+
+        <Route
+          path="*"
+          element={<div style={{ padding: 24 }}>Not Found</div>}
+        />
       </Routes>
     </Router>
   );
