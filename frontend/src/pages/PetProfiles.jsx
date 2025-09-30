@@ -5,8 +5,12 @@ import PetProfilesReadOnly from "./PetProfilesReadOnly";
 
 export default function PetProfiles() {
   const { user } = useAuth();
-  const role = user?.role;
+  const role = (user?.role || "").toLowerCase().trim();
 
-  if (role === "staff") return <PetProfilesStaff />;   // original, full access
-  return <PetProfilesReadOnly />;                      // vet/nurse → reduced, read-only
+  // quick debug (remove later)
+  // console.log("[PetProfiles] role:", user?.role, "→", role);
+
+  if (role === "staff") return <PetProfilesStaff />;
+  return <PetProfilesReadOnly />;
 }
+
