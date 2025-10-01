@@ -11,6 +11,11 @@ const Treatment = () => {
   const [treatments, setTreatments] = useState([]);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // for sorting
+  const [sortField, setSortField] = useState("treatDate");
+  const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
+
   // default hidden the medication and vaccination
   const [showMedication, setShowMedication] = useState(false);
   const [showVaccination, setShowVaccination] = useState(false);
@@ -341,6 +346,30 @@ const Treatment = () => {
       );
     }
   };
+
+  // sorting function
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+  const sortedTreatments = [...treatments].sort((a, b) => {
+    let valA = a[sortField] || "";
+    let valB = b[sortField] || "";
+    if (sortField === "treatDate") {
+      valA = new Date(valA);
+      valB = new Date(valB);
+    } else {
+      valA = valA.toString().toLowerCase();
+      valB = valB.toString().toLowerCase();
+    }
+    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // EDIT
   const handleEdit = (t) => {
@@ -792,36 +821,105 @@ const Treatment = () => {
         {!Array.isArray(treatments) || treatments.length === 0 ? (
           <p>No treatment records available.</p>
         ) : (
-          treatments.map((t) => (
-            <div
-              key={t._id}
-              className="flex justify-between items-center border-b py-2"
-            >
-              <div>
-                <strong>{t.petName}</strong> - Vet: {t.vetName}
-                <br />
-                Appointed By: {t.appointedBy}
-                <br />
-                Date: {t.appointDate} | Duration: {t.duration} mins
-                <br />
-                Status: {t.status} | Reason: {t.reason}
-              </div>
-              <div>
-                <button
-                  onClick={() => handleEdit(t)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(t._id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
+          // initial list without sorting
+          // treatments.map((t) => (
+          //   <div
+          //     key={t._id}
+          //     className="flex justify-between items-center border-b py-2"
+          //   >
+          //     <div>
+          //       <strong>{t.petName}</strong> - Vet: {t.vetName}
+          //       <br />
+          //       Appointed By: {t.appointedBy}
+          //       <br />
+          //       Date: {t.appointDate} | Duration: {t.duration} mins
+          //       <br />
+          //       Status: {t.status} | Reason: {t.reason}
+          //     </div>
+          //     <div>
+          //       <button
+          //         onClick={() => handleEdit(t)}
+          //         className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
+          //       >
+          //         Edit
+          //       </button>
+          //       <button
+          //         onClick={() => handleDelete(t._id)}
+          //         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+          //       >
+          //         Delete
+          //       </button>
+          //     </div>
+          //   </div>
+          // ))
+
+          // list with sorting
+          <table className="min-w-full border border-gray-200 text-center">
+            <thead>
+              <tr className="bg-gray-100">
+                {["petName", "vetName", "nurseName", "treatDate"].map(
+                  (field) => (
+                    <th
+                      key={field}
+                      onClick={() => handleSort(field)}
+                      className="cursor-pointer px-4 py-2 border-b text-center select-none"
+                    >
+                      {/* column name */}
+                      {field === "petName" && "Pet Name"}
+                      {field === "vetName" && "Vet Name"}
+                      {field === "nurseName" && "Nurse Name"}
+                      {field === "treatDate" && "Treatment Date"}
+
+                      {/* sorting arrown */}
+                      <span className="ml-1">
+                        {sortField === field ? (
+                          // show current sorting way in blue
+                          sortOrder === "asc" ? (
+                            <span className="text-blue-600">▲</span>
+                          ) : (
+                            <span className="text-blue-600">▼</span>
+                          )
+                        ) : (
+                          // show default grey
+                          <span className="text-gray-400">▲▼</span>
+                        )}
+                      </span>
+                    </th>
+                  )
+                )}
+                <th className="px-4 py-2 border-b">Edit</th>
+                <th className="px-4 py-2 border-b">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedTreatments.map((t) => (
+                <tr key={t._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">{t.petName}</td>
+                  <td className="px-4 py-2 border-b">{t.vetName}</td>
+                  <td className="px-4 py-2 border-b">{t.nurseName}</td>
+                  <td className="px-4 py-2 border-b">
+                    {t.treatDate?.slice(0, 10)}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <button
+                      onClick={() => handleEdit(t)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-700"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <button
+                      onClick={() => handleDelete(t._id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
