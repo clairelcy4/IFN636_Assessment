@@ -28,15 +28,13 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [vets, setVets] = useState([]); // 保留，若未來要用
+  const [vets, setVets] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // NEW for treatments / pending bills
   const [treatments, setTreatments] = useState([]);
   const [treatmentsLoading, setTreatmentsLoading] = useState(true);
   const [treatmentsError, setTreatmentsError] = useState("");
 
-  // NEW: toggles for left cards
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [showPending, setShowPending] = useState(false);
 
@@ -57,11 +55,7 @@ const Appointments = () => {
         const response = await axiosInstance.get("/appointments", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        if (Array.isArray(response.data)) {
-          setAppointments(response.data);
-        } else {
-          setAppointments([]);
-        }
+        setAppointments(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Failed to fetch appointments:", error);
         setAppointments([]);
@@ -72,7 +66,7 @@ const Appointments = () => {
     if (user?.token) fetchAppointments();
   }, [user]);
 
-  // ---- Fetch Treatments (for Pending Bills) ----
+  // ---- Fetch Treatments ----
   const fetchTreatments = async () => {
     if (!user?.token) return;
     setTreatmentsError("");
@@ -99,9 +93,7 @@ const Appointments = () => {
   };
 
   useEffect(() => {
-    if (user?.token) {
-      fetchTreatments();
-    }
+    if (user?.token) fetchTreatments();
   }, [user?.token]);
 
   const handleChange = (key, value) => {
@@ -111,7 +103,6 @@ const Appointments = () => {
   const validateForm = () => {
     const now = new Date();
     const selectedDate = new Date(formData.appointDate);
-
     if (isNaN(selectedDate.getTime())) {
       alert("Please select a valid appointment date and time.");
       return false;
@@ -130,27 +121,23 @@ const Appointments = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     try {
       if (editingAppointment) {
-        const response = await axiosInstance.put(
+        const res = await axiosInstance.put(
           `/appointments/${editingAppointment._id}`,
           formData,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
         setAppointments((prev) =>
-          prev.map((a) =>
-            a._id === editingAppointment._id ? response.data : a
-          )
+          prev.map((a) => (a._id === editingAppointment._id ? res.data : a))
         );
         setEditingAppointment(null);
       } else {
-        const response = await axiosInstance.post("/appointments", formData, {
+        const res = await axiosInstance.post("/appointments", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setAppointments((prev) => [...prev, response.data]);
+        setAppointments((prev) => [...prev, res.data]);
       }
-
       setFormData({
         appointedBy: "",
         petName: "",
@@ -167,16 +154,16 @@ const Appointments = () => {
     }
   };
 
-  const handleEdit = (appointment) => {
-    setEditingAppointment(appointment);
+  const handleEdit = (a) => {
+    setEditingAppointment(a);
     setFormData({
-      appointedBy: appointment.appointedBy || "",
-      petName: appointment.petName || "",
-      vetName: appointment.vetName || "",
-      appointDate: appointment.appointDate || "",
-      duration: appointment.duration || "",
-      status: appointment.status || "",
-      reason: appointment.reason || "",
+      appointedBy: a.appointedBy || "",
+      petName: a.petName || "",
+      vetName: a.vetName || "",
+      appointDate: a.appointDate || "",
+      duration: a.duration || "",
+      status: a.status || "",
+      reason: a.reason || "",
     });
     setShowForm(true);
   };
@@ -193,9 +180,7 @@ const Appointments = () => {
     }
   };
 
-  // ---- Upcoming Appointments (left card) ----
   const upcomingAppointments = useMemo(() => {
-    if (!Array.isArray(appointments)) return [];
     const now = new Date();
     return appointments
       .filter((a) => a.status !== "Cancelled" && new Date(a.appointDate) >= now)
@@ -209,9 +194,7 @@ const Appointments = () => {
       }));
   }, [appointments]);
 
-  // ---- Pending Bills (from treatments) ----
   const pendingBills = useMemo(() => {
-    if (!Array.isArray(treatments)) return [];
     return treatments
       .filter((t) => !t.isPaid && parseAmount(t.payment) > 0)
       .map((t) => ({
@@ -221,11 +204,7 @@ const Appointments = () => {
         date: t.treatDate ? new Date(t.treatDate) : null,
         amount: parseAmount(t.payment),
       }))
-      .sort((a, b) => {
-        const aTime = a.date ? a.date.getTime() : 0;
-        const bTime = b.date ? b.date.getTime() : 0;
-        return bTime - aTime;
-      });
+      .sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0));
   }, [treatments]);
 
   const totalDue = useMemo(
@@ -233,55 +212,36 @@ const Appointments = () => {
     [pendingBills]
   );
 
-  // ---- Calendar events ----
-  const calendarEvents = Array.isArray(appointments)
-    ? [...appointments]
-        .filter((a) => a.status !== "Cancelled")
-        .sort((a, b) => new Date(a.appointDate) - new Date(b.appointDate))
-        .map((a) => ({
-          id: a._id,
-          title: `${a.petName} - ${a.vetName}`,
-          start: new Date(a.appointDate),
-          end: new Date(new Date(a.appointDate).getTime() + a.duration * 60000),
-          allDay: false,
-          status: a.status,
-        }))
-    : [];
+  const calendarEvents = appointments
+    .filter((a) => a.status !== "Cancelled")
+    .map((a) => ({
+      id: a._id,
+      title: `${a.petName} - ${a.vetName}`,
+      start: new Date(a.appointDate),
+      end: new Date(new Date(a.appointDate).getTime() + a.duration * 60000),
+    }));
 
   return (
     <div className="container mx-auto p-6 grid grid-cols-3 gap-6">
       {/* Left Column */}
       <div className="col-span-1 space-y-6">
-        {/* Toggle Card */}
+        {/* Upcoming Card */}
         <div className="bg-white p-4 shadow rounded">
-          <h2 className="font-bold mb-3">Preview Controls</h2>
-          <label className="flex items-center gap-2 mb-2">
-            <input
-              type="checkbox"
-              checked={showUpcoming}
-              onChange={(e) => setShowUpcoming(e.target.checked)}
-            />
-            <span>Show Upcoming Appointments</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showPending}
-              onChange={(e) => setShowPending(e.target.checked)}
-            />
-            <span>Show Pending Billing</span>
-          </label>
-          <p className="text-xs text-gray-500 mt-2">
-            When unchecked, the left card only shows ‘Preview’. After checking, the data will be loaded.
-          </p>
-        </div>
-
-        {/* Upcoming */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="font-bold mb-3">Upcoming Appointment</h2>
+          <div className="flex items-center mb-3">
+            <h2 className="font-bold">Upcoming Appointment</h2>
+            <div className="flex-1" />
+            <label className="flex items-center gap-2 text-sm ml-2">
+              <input
+                type="checkbox"
+                checked={showUpcoming}
+                onChange={(e) => setShowUpcoming(e.target.checked)}
+              />
+              <span>Show</span>
+            </label>
+          </div>
           {!showUpcoming ? (
             <div className="text-sm text-gray-400 italic">
-              Preview — check “Show Upcoming Appointments” to display items.
+              Preview — check "Show" to display items.
             </div>
           ) : upcomingAppointments.length > 0 ? (
             <ul className="space-y-2">
@@ -296,23 +256,31 @@ const Appointments = () => {
           )}
         </div>
 
-        {/* Pending Billing (from treatments.payment) */}
+        {/* Pending Billing Card */}
         <div className="bg-white p-4 shadow rounded">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center mb-3">
             <h2 className="font-bold">Pending Billing</h2>
             {showPending && (
-              <div className="text-right">
+              <div className="text-right ml-4">
                 <div className="text-xs text-gray-500">Total Due</div>
                 <div className="text-sm font-semibold">
                   {currency.format(totalDue)}
                 </div>
               </div>
             )}
+            <div className="flex-1" />
+            <label className="flex items-center gap-2 text-sm ml-2">
+              <input
+                type="checkbox"
+                checked={showPending}
+                onChange={(e) => setShowPending(e.target.checked)}
+              />
+              <span>Show</span>
+            </label>
           </div>
-
           {!showPending ? (
             <div className="text-sm text-gray-400 italic">
-              Preview — check “Show Pending Billing” to display items.
+              Preview — check "Show" to display items.
             </div>
           ) : treatmentsLoading ? (
             <div className="text-sm text-gray-500">Loading…</div>
@@ -324,8 +292,7 @@ const Appointments = () => {
                 <li key={bill.id} className="text-sm flex justify-between">
                   <span>
                     {bill.pet} / {bill.vet}
-                    {bill.date &&
-                      ` · ${bill.date.toLocaleDateString("en-AU")}`}
+                    {bill.date && ` · ${bill.date.toLocaleDateString("en-AU")}`}
                   </span>
                   <strong>{currency.format(bill.amount)}</strong>
                 </li>
