@@ -1,9 +1,9 @@
-import Treatment from "../models/Treatment.js";
+const { TreatmentModel } = require("../models/Treatment");
 
 // READ all
-export const getTreatments = async (req, res) => {
+const getTreatments = async (req, res) => {
   try {
-    const treatments = await Treatment.find();
+    const treatments = await TreatmentModel.find();
     res.status(200).json(treatments);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -11,9 +11,9 @@ export const getTreatments = async (req, res) => {
 };
 
 // CREATE
-export const addTreatment = async (req, res) => {
+const addTreatment = async (req, res) => {
   try {
-    const treatment = new Treatment(req.body);
+    const treatment = new TreatmentModel(req.body);
     const saved = await treatment.save();
     res.status(201).json(saved);
   } catch (err) {
@@ -22,11 +22,13 @@ export const addTreatment = async (req, res) => {
 };
 
 // UPDATE
-export const updateTreatment = async (req, res) => {
+const updateTreatment = async (req, res) => {
   try {
-    const updated = await Treatment.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updated = await TreatmentModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     if (!updated) {
       return res.status(404).json({ message: "Treatment not found" });
     }
@@ -37,9 +39,9 @@ export const updateTreatment = async (req, res) => {
 };
 
 // DELETE
-export const deleteTreatment = async (req, res) => {
+const deleteTreatment = async (req, res) => {
   try {
-    const deleted = await Treatment.findByIdAndDelete(req.params.id);
+    const deleted = await TreatmentModel.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ message: "Treatment not found" });
     }
@@ -47,4 +49,11 @@ export const deleteTreatment = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+module.exports = {
+  getTreatments,
+  addTreatment,
+  updateTreatment,
+  deleteTreatment,
 };

@@ -1,5 +1,43 @@
 const mongoose = require("mongoose");
 
+class Treatment {
+  #isPaid; // private for OOP Principle "Encapsulation"
+
+  constructor({
+    petName,
+    vetName,
+    nurseName,
+    diagnosisRecords = [],
+    medication = [],
+    vaccination = [],
+    treatDate,
+    followUp = false,
+    followUpDate,
+    payment = "",
+  }) {
+    this.petName = petName;
+    this.vetName = vetName;
+    this.nurseName = nurseName;
+    this.diagnosisRecords = diagnosisRecords;
+    this.medication = medication;
+    this.vaccination = vaccination;
+    this.treatDate = treatDate;
+    this.followUp = followUp;
+    this.followUpDate = followUpDate;
+    this.payment = payment;
+    this.#isPaid = false;
+  }
+
+  // Encapsulation: access to private state
+  markAsPaid() {
+    this.#isPaid = true;
+  }
+
+  isPaid() {
+    return this.#isPaid;
+  }
+}
+
 const TreatmentSchema = new mongoose.Schema({
   petName: { type: String, required: true },
   vetName: { type: String },
@@ -39,5 +77,8 @@ const TreatmentSchema = new mongoose.Schema({
   isPaid: { type: Boolean, default: false },
 });
 
-module.exports =
-  mongoose.models.Treatment || mongoose.model("Treatment", TreatmentSchema);
+module.exports = {
+  TreatmentClass: Treatment, // Encapsulation
+  TreatmentModel:
+    mongoose.models.Treatment || mongoose.model("Treatment", TreatmentSchema),
+};
