@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Treatment = require("../models/Treatment");
+const { TreatmentModel } = require("../models/Treatment");
 
 // GET all
 router.get("/", async (req, res) => {
   try {
-    const treatments = await Treatment.find();
+    const treatments = await TreatmentModel.find();
     res.json(treatments);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -28,7 +28,7 @@ router.get("/:id", async (req, res) => {
 // CREATE
 router.post("/", async (req, res) => {
   try {
-    const treatment = new Treatment(req.body);
+    const treatment = new TreatmentModel(req.body);
     const saved = await treatment.save();
     res.status(201).json(saved);
   } catch (err) {
@@ -39,9 +39,13 @@ router.post("/", async (req, res) => {
 // UPDATE
 router.put("/:id", async (req, res) => {
   try {
-    const updated = await Treatment.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updated = await TreatmentModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
     if (!updated) {
       return res.status(404).json({ message: "Treatment not found" });
     }
@@ -54,7 +58,7 @@ router.put("/:id", async (req, res) => {
 // DELETE
 router.delete("/:id", async (req, res) => {
   try {
-    const deleted = await Treatment.findByIdAndDelete(req.params.id);
+    const deleted = await TreatmentModel.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ message: "Treatment not found" });
     }

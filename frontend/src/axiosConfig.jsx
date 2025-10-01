@@ -9,10 +9,14 @@
 // export default axiosInstance;
 
 // src/api/axios.js
+
 import axios from "axios";
 
+/*debug*/
+// console.log(">>> REACT_APP_API_URL =", process.env.REACT_APP_API_URL);
+
 // Build base URL safely
-const base = (process.env.REACT_APP_API_URL || "").replace(/\/+$/,""); // trim trailing /
+const base = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, ""); // trim trailing /
 const api = axios.create({
   baseURL: `${base}/api`,
   headers: { "Content-Type": "application/json" },
@@ -27,7 +31,9 @@ api.interceptors.request.use((config) => {
       const { token } = JSON.parse(raw) || {};
       if (token) config.headers.Authorization = `Bearer ${token}`;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return config;
 });
 
