@@ -18,7 +18,10 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <Link to="/" className="text-2xl font-bold flex items-center group logo">
+      <Link
+        to={user ? "/homepage" : "/login"}
+        className="text-2xl font-bold flex items-center group logo"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 640 640"
