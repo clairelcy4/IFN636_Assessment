@@ -2,21 +2,16 @@
 
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-chai.use(chaiHttp); // <-- must come right after import
-
+chai.use(chaiHttp);
 const { expect } = chai;
-const app = require("../server"); // server.js must export app
+const app = require("../server");
+const Appointment = require("../models/Appointment");
 
 describe("Appointments API with Strategies", () => {
-  let createdId;
 
-  // Reset state before each test to avoid cross-test conflicts
-  beforeEach((done) => {
-    chai.request(app)
-      .get("/api/appointments")
-      .end(() => {
-        done();
-      });
+  // Reset DB before each test
+  beforeEach(async () => {
+    await Appointment.deleteMany({});
   });
 
   // Strict Strategy
@@ -35,137 +30,166 @@ describe("Appointments API with Strategies", () => {
       })
       .end((err, res) => {
         expect(res).to.have.status(201);
-        createdId = res.body._id;
+        expect(res.body).to.have.property("_id");
         done();
       });
   });
 
-  it("should reject overlapping appointment under strict strategy", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "Bob",
-        petName: "Charlie",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:00:00.000Z", // same time as Alice
-        duration: 30,
-        status: "Scheduled",
-        reason: "Vaccination",
-        strategy: "strict",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        done();
-      });
+  it("should reject overlapping appointment under strict strategy", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "Bob",
+      petName: "Charlie",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+      reason: "Vaccination",
+      strategy: "strict",
+    });
+    expect(res).to.have.status(400);
   });
 
   // Buffer Strategy
-  it("should reject appointments within buffer time", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "Eve",
-        petName: "Milo",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:20:00.000Z", // within 15min buffer
-        duration: 30,
-        status: "Scheduled",
-        reason: "Surgery",
-        strategy: "buffer",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        done();
-      });
+  it("should reject appointments within buffer time", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "Eve",
+      petName: "Milo",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:20:00.000Z", // within 15min buffer
+      duration: 30,
+      status: "Scheduled",
+      reason: "Surgery",
+      strategy: "buffer",
+    });
+    expect(res).to.have.status(400);
   });
 
   // Relaxed Strategy
-  it("should allow overlapping appointment under relaxed strategy", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "Sam",
-        petName: "Luna",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:00:00.000Z", // overlaps but relaxed allows
-        duration: 30,
-        status: "Scheduled",
-        reason: "Follow-up",
-        strategy: "relaxed",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(201);
-        done();
-      });
+  it("should allow overlapping appointment under relaxed strategy", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "Sam",
+      petName: "Luna",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z", // overlaps but relaxed allows
+      duration: 30,
+      status: "Scheduled",
+      reason: "Follow-up",
+      strategy: "relaxed",
+    });
+    expect(res).to.have.status(201);
   });
 
   // Priority Strategy
-  it("should allow emergency appointment even if overlapping", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "EmergencyUser",
-        petName: "Rocky",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:00:00.000Z", // overlaps, but emergency
-        duration: 30,
-        status: "Scheduled",
-        reason: "Emergency",
-        strategy: "priority",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(201);
-        done();
-      });
+  it("should allow emergency appointment even if overlapping", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "EmergencyUser",
+      petName: "Rocky",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z", // overlaps, but emergency
+      duration: 30,
+      status: "Scheduled",
+      reason: "Emergency",
+      strategy: "priority",
+    });
+    expect(res).to.have.status(201);
   });
 
   // Flexible Strategy
-  it("should allow small overlaps under flexible strategy", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "John",
-        petName: "Max",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:25:00.000Z", // small overlap
-        duration: 30,
-        status: "Scheduled",
-        reason: "Checkup",
-        strategy: "flexible",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(201);
-        done();
-      });
+  it("should allow small overlaps under flexible strategy", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "John",
+      petName: "Max",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:25:00.000Z", // 5 min overlap
+      duration: 30,
+      status: "Scheduled",
+      reason: "Checkup",
+      strategy: "flexible",
+    });
+    expect(res).to.have.status(201);
   });
 
-  it("should reject large overlaps under flexible strategy", (done) => {
-    chai.request(app)
-      .post("/api/appointments")
-      .send({
-        appointedBy: "Kate",
-        petName: "Bella",
-        vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:10:00.000Z", // too big overlap
-        duration: 30,
-        status: "Scheduled",
-        reason: "Checkup",
-        strategy: "flexible",
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        done();
-      });
+  it("should reject large overlaps under flexible strategy", async () => {
+    await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).post("/api/appointments").send({
+      appointedBy: "Kate",
+      petName: "Bella",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:10:00.000Z", // too big overlap
+      duration: 30,
+      status: "Scheduled",
+      reason: "Checkup",
+      strategy: "flexible",
+    });
+    expect(res).to.have.status(400);
   });
 
-  // Clean up
-  it("should delete appointment", (done) => {
-    chai.request(app)
-      .delete(`/api/appointments/${createdId}`)
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.message).to.equal("Appointment deleted");
-        done();
-      });
+  // Delete
+  it("should delete appointment", async () => {
+    const saved = await Appointment.create({
+      appointedBy: "Alice",
+      petName: "Buddy",
+      vetName: "Dr. Smith",
+      appointDate: "2025-09-30T10:00:00.000Z",
+      duration: 30,
+      status: "Scheduled",
+    });
+
+    const res = await chai.request(app).delete(`/api/appointments/${saved._id}`);
+    expect(res).to.have.status(200);
+    expect(res.body.message).to.equal("Appointment deleted");
   });
 });
