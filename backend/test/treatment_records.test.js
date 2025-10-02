@@ -1,6 +1,6 @@
 const chai = require("chai");
 const sinon = require("sinon");
-const Treatment = require("../models/Treatment");
+const { TreatmentModel: Treatment } = require("../models/Treatment");
 const {
   getTreatments,
   addTreatment,
