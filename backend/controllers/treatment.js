@@ -10,6 +10,19 @@ const getTreatments = async (req, res) => {
   }
 };
 
+// READ one
+const getTreatmentById = async (req, res) => {
+  try {
+    const treatment = await TreatmentModel.findById(req.params.id);
+    if (!treatment) {
+      return res.status(404).json({ message: "Treatment not found" });
+    }
+    res.status(200).json(treatment);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // CREATE
 const addTreatment = async (req, res) => {
   try {

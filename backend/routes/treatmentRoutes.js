@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
 // GET by ID
 router.get("/:id", async (req, res) => {
   try {
-    const treatment = await Treatment.findById(req.params.id);
+    const treatment = await TreatmentModel.findById(req.params.id);
     if (!treatment) {
       return res.status(404).json({ message: "Treatment not found" });
     }

@@ -115,14 +115,13 @@ const Treatment = () => {
     }
   };
   useEffect(() => {
-    if (user?.token) {
-      if (treatmentId) {
-        fetchSingleTreatment();
-      } else {
-        fetchTreatments(); //
-      }
+    if (!user?.token) return;
+    if (treatmentId) {
+      fetchSingleTreatment();
+    } else {
+      fetchTreatments();
     }
-  }, [user, treatmentId]);
+  }, [user?.token, treatmentId]);
 
   const fetchSingleTreatment = async () => {
     try {

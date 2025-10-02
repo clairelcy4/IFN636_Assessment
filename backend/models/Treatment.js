@@ -40,8 +40,8 @@ class Treatment {
 
 const TreatmentSchema = new mongoose.Schema({
   petName: { type: String, required: true },
-  vetName: { type: String },
-  nurseName: { type: String },
+  vetName: { type: String, required: true },
+  nurseName: { type: String, required: true },
   diagnosisRecords: [
     {
       weight: String,
