@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const animalSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -11,18 +10,15 @@ const animalSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    discriminatorKey: "kind", 
+    discriminatorKey: "kind",
   }
 );
-
 
 animalSchema.methods.getInfo = function () {
   return `Name: ${this.name}, Species: ${this.species}`;
 };
 
-
 const Animal = mongoose.model("Animal", animalSchema);
-
 
 const petSchema = new mongoose.Schema({
   ownerName: { type: String },
@@ -35,11 +31,9 @@ const petSchema = new mongoose.Schema({
   },
 });
 
-
 petSchema.methods.getInfo = function () {
   return `Name: ${this.name}, Species: ${this.species}, Owner: ${this.ownerName}`;
 };
-
 
 const Pet = Animal.discriminator("Pet", petSchema);
 
