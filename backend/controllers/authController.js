@@ -40,10 +40,10 @@ async function loginUser(req, res) {
     const email = (req.body.email || "").toLowerCase().trim();
     const { password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password"); // optional; safe to keep
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-    const ok = await bcrypt.compare(password, user.password);
+    const ok = await user.checkPassword(password);
     if (!ok) return res.status(401).json({ message: "Invalid credentials" });
 
     return res.json({
