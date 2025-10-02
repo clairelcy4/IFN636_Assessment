@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
 
 const Treatment = () => {
-  const { appointmentId, treatmentId } = useParams();
+  const { appointmentId, treatmentId, petName } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
@@ -101,7 +101,11 @@ const Treatment = () => {
             },
           ],
         }));
-        setTreatments(data);
+        // setTreatments(data);
+        const filtered = petName
+          ? data.filter((t) => t.petName === petName)
+          : data;
+        setTreatments(filtered);
       } else {
         console.error("Unexpected treatments API response:", res.data);
         setTreatments([]);
@@ -115,14 +119,13 @@ const Treatment = () => {
     }
   };
   useEffect(() => {
-    if (user?.token) {
-      if (treatmentId) {
-        fetchSingleTreatment();
-      } else {
-        fetchTreatments(); //
-      }
+    if (!user?.token) return;
+    if (treatmentId) {
+      fetchSingleTreatment();
+    } else {
+      fetchTreatments();
     }
-  }, [user, treatmentId]);
+  }, [user?.token, treatmentId]);
 
   const fetchSingleTreatment = async () => {
     try {
@@ -854,76 +857,77 @@ const Treatment = () => {
           // ))
 
           // list with sorting
-          <table className="min-w-full border border-gray-200 text-center">
-            <thead>
-              <tr className="bg-gray-100">
-                {["petName", "vetName", "nurseName", "treatDate"].map(
-                  (field) => (
-                    <th
-                      key={field}
-                      onClick={() => handleSort(field)}
-                      className="cursor-pointer px-4 py-2 border-b text-center select-none"
-                    >
-                      {/* column name */}
-                      {field === "petName" && "Pet Name"}
-                      {field === "vetName" && "Vet Name"}
-                      {field === "nurseName" && "Nurse Name"}
-                      {field === "treatDate" && "Treatment Date"}
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 text-center">
+              <thead>
+                <tr className="bg-gray-100">
+                  {["petName", "vetName", "nurseName", "treatDate"].map(
+                    (field) => (
+                      <th
+                        key={field}
+                        onClick={() => handleSort(field)}
+                        className="cursor-pointer px-4 py-2 border-b text-center select-none"
+                      >
+                        {/* column name */}
+                        {field === "petName" && "Pet Name"}
+                        {field === "vetName" && "Vet Name"}
+                        {field === "nurseName" && "Nurse Name"}
+                        {field === "treatDate" && "Treatment Date"}
 
-                      {/* sorting arrown */}
-                      <span className="ml-1">
-                        {sortField === field ? (
-                          // show current sorting way in blue
-                          sortOrder === "asc" ? (
-                            <span className="text-blue-600">▲</span>
+                        {/* sorting arrown */}
+                        <span className="ml-1">
+                          {sortField === field ? (
+                            // show current sorting way in blue
+                            sortOrder === "asc" ? (
+                              <span className="text-blue-600">▲</span>
+                            ) : (
+                              <span className="text-blue-600">▼</span>
+                            )
                           ) : (
-                            <span className="text-blue-600">▼</span>
-                          )
-                        ) : (
-                          // show default grey
-                          <span className="text-gray-400">▲▼</span>
-                        )}
-                      </span>
-                    </th>
-                  )
-                )}
-                <th className="px-4 py-2 border-b">Edit</th>
-                <th className="px-4 py-2 border-b">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedTreatments.map((t) => (
-                <tr key={t._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">{t.petName}</td>
-                  <td className="px-4 py-2 border-b">{t.vetName}</td>
-                  <td className="px-4 py-2 border-b">{t.nurseName}</td>
-                  <td className="px-4 py-2 border-b">
-                    {t.treatDate?.slice(0, 10)}
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    <button
-                      onClick={() => handleEdit(t)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-700"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    <button
-                      onClick={() => handleDelete(t._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                            // show default grey
+                            <span className="text-gray-400">▲▼</span>
+                          )}
+                        </span>
+                      </th>
+                    )
+                  )}
+                  <th className="px-4 py-2 border-b">Edit</th>
+                  <th className="px-4 py-2 border-b">Delete</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sortedTreatments.map((t) => (
+                  <tr key={t._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 border-b">{t.petName}</td>
+                    <td className="px-4 py-2 border-b">{t.vetName}</td>
+                    <td className="px-4 py-2 border-b">{t.nurseName}</td>
+                    <td className="px-4 py-2 border-b">
+                      {t.treatDate?.slice(0, 10)}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      <button
+                        onClick={() => handleEdit(t)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-700"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      <button
+                        onClick={() => handleDelete(t._id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
   );
 };
-
 export default Treatment;

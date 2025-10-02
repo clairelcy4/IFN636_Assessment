@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PetProfilesStaff = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ const PetProfilesStaff = () => {
   });
   const [editing, setEditing] = useState(false);
   const [currentPetId, setCurrentPetId] = useState(null);
+  const navigate = useNavigate();
 
   const fetchPets = async () => {
     try {
@@ -35,7 +37,8 @@ const PetProfilesStaff = () => {
     if (user?.token) fetchPets();
   }, [user?.token]);
 
-  const handleChange = (key, value) => setFormData({ ...formData, [key]: value });
+  const handleChange = (key, value) =>
+    setFormData({ ...formData, [key]: value });
 
   const resetForm = () => {
     setFormData({
@@ -111,37 +114,71 @@ const PetProfilesStaff = () => {
 
       {/* Create / Edit form (STAFF only) */}
       <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded">
-        <input type="text" placeholder="Pet Name" value={formData.name}
+        <input
+          type="text"
+          placeholder="Pet Name"
+          value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
-        <input type="text" placeholder="Species" value={formData.species}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Species"
+          value={formData.species}
           onChange={(e) => handleChange("species", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
-        <input type="number" placeholder="Age" value={formData.age}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="number"
+          placeholder="Age"
+          value={formData.age}
           onChange={(e) => handleChange("age", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
-        <input type="text" placeholder="Allergy Med" value={formData.allergyMed}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Allergy Med"
+          value={formData.allergyMed}
           onChange={(e) => handleChange("allergyMed", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
+          className="w-full mb-4 p-2 border rounded"
+        />
 
         {/* Owner/admin fields (staff only) */}
-        <input type="text" placeholder="Owner Name" value={formData.ownerName}
+        <input
+          type="text"
+          placeholder="Owner Name"
+          value={formData.ownerName}
           onChange={(e) => handleChange("ownerName", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
-        <input type="text" placeholder="Owner Phone" value={formData.ownerPhone}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Owner Phone"
+          value={formData.ownerPhone}
           onChange={(e) => handleChange("ownerPhone", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
-        <input type="email" placeholder="Owner Email" value={formData.ownerEmail}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          type="email"
+          placeholder="Owner Email"
+          value={formData.ownerEmail}
           onChange={(e) => handleChange("ownerEmail", e.target.value)}
-          className="w-full mb-4 p-2 border rounded" />
+          className="w-full mb-4 p-2 border rounded"
+        />
 
         <div className="flex gap-2">
-          <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
             {editing ? "Update" : "Add"}
           </button>
           {editing && (
-            <button type="button" onClick={resetForm}
-              className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+            >
               Cancel
             </button>
           )}
@@ -149,28 +186,71 @@ const PetProfilesStaff = () => {
       </form>
 
       <h3 className="text-lg font-bold mt-6">Pet Profile List</h3>
+      {/* updated table layout */}
       {Array.isArray(pets) && pets.length > 0 ? (
-        pets.map((pet) => (
-          <div key={pet._id} className="bg-gray-100 p-4 my-2 rounded shadow">
-            {pet.name} ({pet.species}), Age: {pet.age}
-            <br />
-            Allergy Med: {pet.allergyMed || pet.allergies || "—"}
-            <br />
-            Owner: {pet.ownerName || "—"} | {pet.ownerPhone || "—"} | {pet.ownerEmail || "—"}
-            <div className="mt-2">
-              <button onClick={() => handleEdit(pet)}
-                className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700">
-                Edit
-              </button>
-              <button onClick={() => handleDelete(pet._id)}
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200 text-center">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 border-b">Pet Name</th>
+                <th className="px-4 py-2 border-b">Species</th>
+                <th className="px-4 py-2 border-b">Age</th>
+                <th className="px-4 py-2 border-b">Allergy Med</th>
+                <th className="px-4 py-2 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pets.map((pet) => (
+                <tr key={pet._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b font-semibold">
+                    {pet.name}
+                  </td>
+                  <td className="px-4 py-2 border-b">{pet.species || "—"}</td>
+                  <td className="px-4 py-2 border-b">{pet.age ?? "—"}</td>
+                  <td className="px-4 py-2 border-b">
+                    {pet.allergyMed || pet.allergies || "—"}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleEdit(pet)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(pet._id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/appointments/pet/${pet.name}`)
+                        }
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Appointments{" "}
+                      </button>
+                      <button
+                        onClick={() => navigate(`/treatments/pet/${pet.name}`)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Treatment Records
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p>{pets.length === 0 ? "No pet profiles found." : "Loading pet profiles..."}</p>
+        <p>
+          {pets.length === 0
+            ? "No pet profiles found."
+            : "Loading pet profiles..."}
+        </p>
       )}
     </div>
   );

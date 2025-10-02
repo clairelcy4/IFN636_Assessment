@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PetProfilesReadOnly = () => {
   const { user } = useAuth();
   const [pets, setPets] = useState([]);
+  const navigate = useNavigate();
 
   const fetchPets = async () => {
     try {
@@ -33,21 +35,64 @@ const PetProfilesReadOnly = () => {
       {/* No create/edit form here */}
 
       <h3 className="text-lg font-bold mt-2">Pet List</h3>
-      {Array.isArray(pets) && pets.length > 0 ? (
-        pets.map((pet) => (
-          <div key={pet._id} className="bg-gray-100 p-4 my-2 rounded shadow">
-            <div className="font-semibold">{pet.name}</div>
-            <div>Species: {pet.species || "—"}</div>
-            <div>Age: {pet.age ?? "—"}</div>
-            <div>Allergy Med: {pet.allergyMed || pet.allergies || "—"}</div>
 
-            {/* Intentionally hide PII/admin fields */}
-            {/* Owner Name/Phone/Email NOT shown */}
-            {/* No edit/delete buttons */}
-          </div>
-        ))
+      {Array.isArray(pets) && pets.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200 text-center">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 border-b">Pet Name</th>
+                <th className="px-4 py-2 border-b">Species</th>
+                <th className="px-4 py-2 border-b">Age</th>
+                <th className="px-4 py-2 border-b">Allergy Med</th>
+                <th className="px-4 py-2 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pets.map((pet) => (
+                <tr key={pet._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b font-semibold">
+                    {pet.name}
+                  </td>
+                  <td className="px-4 py-2 border-b">{pet.species || "—"}</td>
+                  <td className="px-4 py-2 border-b">{pet.age ?? "—"}</td>
+                  <td className="px-4 py-2 border-b">
+                    {pet.allergyMed || pet.allergies || "—"}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    {/* Intentionally hide PII/admin fields */}
+                    {/* Owner Name/Phone/Email NOT shown */}
+                    {/* No edit/delete buttons */}
+
+                    {/* association */}
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/appointments/pet/${pet.name}`)
+                        }
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Appointments
+                      </button>
+                      <button
+                        onClick={() => navigate(`/treatments/pet/${pet.name}`)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Treatment Records
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p>{pets.length === 0 ? "No pet profiles found." : "Loading pet profiles..."}</p>
+        <p>
+          {pets.length === 0
+            ? "No pet profiles found."
+            : "Loading pet profiles..."}
+        </p>
       )}
 
       <p className="text-sm text-gray-500 mt-4">Read-only • Vet/Nurse</p>
