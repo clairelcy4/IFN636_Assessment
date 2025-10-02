@@ -2,7 +2,7 @@
 const Pet = require("../models/Pet");
 
 // debug
-console.log("DEBUG Pet model:", typeof Pet, Pet.modelName);
+// console.log("DEBUG Pet model:", typeof Pet, Pet.modelName);
 
 // Fields vets/nurses can see (adjust to your schema)
 const REDUCED_FIELDS =

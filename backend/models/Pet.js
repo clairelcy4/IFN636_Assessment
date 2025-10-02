@@ -37,4 +37,6 @@ petSchema.methods.getInfo = function () {
 
 const Pet = Animal.discriminator("Pet", petSchema);
 
-module.exports = { Animal, Pet };
+module.exports = Pet;
+module.exports.Animal = Animal;
+module.exports.Pet = Pet;
