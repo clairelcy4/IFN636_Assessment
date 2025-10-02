@@ -24,9 +24,16 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/pets" element={<PetProfiles />} />
+
         <Route path="/appointments" element={<Appointments />} />
+        {/* association  for appointment*/}
+        <Route path="/appointments/pet/:petName" element={<Appointments />} />
+
         <Route path="/treatment" element={<Treatment />} />
         <Route path="/treatment/:treatmentId" element={<Treatment />} />
+        {/* association  for treatment*/}
+        <Route path="/treatments/pet/:petName" element={<Treatment />} />
+
         <Route path="/profile" element={<Profile />} />
         <Route path="/vet/:vetId/schedule" element={<VetSchedule />} />
 
