@@ -252,7 +252,9 @@ const Appointments = () => {
               ))}
             </ul>
           ) : (
-            <div className="text-sm text-gray-500">No upcoming appointments</div>
+            <div className="text-sm text-gray-500">
+              No upcoming appointments
+            </div>
           )}
         </div>
 
@@ -260,14 +262,6 @@ const Appointments = () => {
         <div className="bg-white p-4 shadow rounded">
           <div className="flex items-center mb-3">
             <h2 className="font-bold">Pending Billing</h2>
-            {showPending && (
-              <div className="text-right ml-4">
-                <div className="text-xs text-gray-500">Total Due</div>
-                <div className="text-sm font-semibold">
-                  {currency.format(totalDue)}
-                </div>
-              </div>
-            )}
             <div className="flex-1" />
             <label className="flex items-center gap-2 text-sm ml-2">
               <input
@@ -287,17 +281,24 @@ const Appointments = () => {
           ) : treatmentsError ? (
             <div className="text-sm text-red-600">{treatmentsError}</div>
           ) : pendingBills.length > 0 ? (
-            <ul className="space-y-2">
-              {pendingBills.map((bill) => (
-                <li key={bill.id} className="text-sm flex justify-between">
-                  <span>
-                    {bill.pet} / {bill.vet}
-                    {bill.date && ` · ${bill.date.toLocaleDateString("en-AU")}`}
-                  </span>
-                  <strong>{currency.format(bill.amount)}</strong>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="space-y-2">
+                {pendingBills.map((bill) => (
+                  <li key={bill.id} className="text-sm flex justify-between">
+                    <span>
+                      {bill.pet} / {bill.vet}
+                      {bill.date &&
+                        ` · ${bill.date.toLocaleDateString("en-AU")}`}
+                    </span>
+                    <strong>{currency.format(bill.amount)}</strong>
+                  </li>
+                ))}
+              </ul>
+              <div className="text-sm flex justify-between border-t pt-2 mt-2">
+                <span className="text-gray-500">Total Due</span>
+                <strong>{currency.format(totalDue)}</strong>
+              </div>
+            </>
           ) : (
             <div className="text-sm text-gray-500">No pending bills</div>
           )}
