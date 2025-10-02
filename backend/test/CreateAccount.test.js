@@ -14,7 +14,7 @@ const {
 } = require("../controllers/petController");
 
 const User = require("../models/User");
-const Pet = require("../models/Pet");
+const { Pet } = require("../models/Pet");
 const jwt = require("jsonwebtoken");
 
 describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)", () => {
@@ -58,7 +58,8 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
 
     await registerUser(req, res);
 
-    expect(User.findOne.calledOnceWith({ email: "alice@example.com" })).to.be.true;
+    expect(User.findOne.calledOnceWith({ email: "alice@example.com" })).to.be
+      .true;
     expect(User.create.calledOnce).to.be.true;
 
     expect(res.status.calledWith(201)).to.be.true;
@@ -86,7 +87,8 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
 
     await loginUser(req, res);
 
-    expect(User.findOne.calledOnceWith({ email: "alice@example.com" })).to.be.true;
+    expect(User.findOne.calledOnceWith({ email: "alice@example.com" })).to.be
+      .true;
     expect(selectStub.calledOnceWith("+password")).to.be.true;
     expect(fakeUser.checkPassword.calledOnceWith("Passw0rd!")).to.be.true;
 
@@ -106,7 +108,9 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
       email: "alice@example.com",
       role: "vet",
       phoneNumber: "0400123456",
-      toJSON() { return this; },
+      toJSON() {
+        return this;
+      },
     };
 
     // Support BOTH controller styles:
@@ -202,5 +206,3 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     expect(res.json.calledWithMatch({ message: "Pet deleted" })).to.be.true;
   });
 });
-
-
