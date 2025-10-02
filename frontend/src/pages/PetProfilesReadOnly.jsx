@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PetProfilesReadOnly = () => {
   const { user } = useAuth();
   const [pets, setPets] = useState([]);
+  const navigate = useNavigate();
 
   const fetchPets = async () => {
     try {
@@ -44,10 +46,30 @@ const PetProfilesReadOnly = () => {
             {/* Intentionally hide PII/admin fields */}
             {/* Owner Name/Phone/Email NOT shown */}
             {/* No edit/delete buttons */}
+
+            {/* association */}
+            <div className="mt-2 flex gap-2">
+              <button
+                onClick={() => navigate(`/appointments/pet/${pet.name}`)}
+                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+              >
+                Appointments
+              </button>
+              <button
+                onClick={() => navigate(`/treatments/pet/${pet.name}`)}
+                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+              >
+                Treatment Records
+              </button>
+            </div>
           </div>
         ))
       ) : (
-        <p>{pets.length === 0 ? "No pet profiles found." : "Loading pet profiles..."}</p>
+        <p>
+          {pets.length === 0
+            ? "No pet profiles found."
+            : "Loading pet profiles..."}
+        </p>
       )}
 
       <p className="text-sm text-gray-500 mt-4">Read-only • Vet/Nurse</p>

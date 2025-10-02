@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // calendar
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -12,6 +12,7 @@ const localizer = momentLocalizer(moment);
 const Appointments = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { petName } = useParams();
   const [appointments, setAppointments] = useState([]);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -37,7 +38,11 @@ const Appointments = () => {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         if (Array.isArray(response.data)) {
-          setAppointments(response.data);
+          // setAppointments(response.data);
+          const filtered = petName
+            ? response.data.filter((a) => a.petName === petName)
+            : response.data;
+          setAppointments(filtered);
         } else {
           console.error("Unexpected appointments API response:", response.data);
           setAppointments([]);

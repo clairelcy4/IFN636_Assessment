@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
 
 const Treatment = () => {
-  const { appointmentId, treatmentId } = useParams();
+  const { appointmentId, treatmentId, petName } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [treatments, setTreatments] = useState([]);
@@ -101,7 +101,11 @@ const Treatment = () => {
             },
           ],
         }));
-        setTreatments(data);
+        // setTreatments(data);
+        const filtered = petName
+          ? data.filter((t) => t.petName === petName)
+          : data;
+        setTreatments(filtered);
       } else {
         console.error("Unexpected treatments API response:", res.data);
         setTreatments([]);
