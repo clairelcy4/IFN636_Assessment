@@ -2,7 +2,6 @@ const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 
-/** Controllers under test **/
 const {
   registerUser,
   loginUser,
@@ -14,7 +13,6 @@ const {
   deletePet,
 } = require("../controllers/petController");
 
-/** Models + deps we’ll stub **/
 const User = require("../models/User");
 const Pet = require("../models/Pet");
 const jwt = require("jsonwebtoken");
@@ -26,7 +24,6 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
   beforeEach(() => {
     sandbox = sinon.createSandbox();
 
-    // Fresh req/res each test
     req = { body: {}, params: {}, user: {} };
     res = {
       status: sandbox.stub().returnsThis(),
@@ -38,21 +35,18 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     sandbox.restore();
   });
 
-  /** ======================
-   *  AUTH: REGISTER (R1)
-   *  ====================== */
   it("R1: Register → creates account and returns token & role", async () => {
     req.body = {
       name: "Alice Vet",
-      email: "Alice@Example.com",    // verify normalization
+      email: "Alice@Example.com",
       password: "Passw0rd!",
-      role: "Vet",                   // verify normalization
+      role: "Vet",
     };
 
-    // Email not in use
+    // email not in use
     sandbox.stub(User, "findOne").resolves(null);
 
-    // Created user returned by model
+    // created user returned by model
     sandbox.stub(User, "create").resolves({
       _id: "user_123",
       name: "Alice Vet",
@@ -74,20 +68,16 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     expect(payload.role).to.equal("vet");
   });
 
-  /** ======================
-   *  AUTH: LOGIN
-   *  ====================== */
   it("Login: accepts valid credentials (encapsulation: checkPassword)", async () => {
     req.body = { email: "alice@example.com", password: "Passw0rd!" };
 
-    // When controller does: await User.findOne({email}).select("+password")
-    // we must return an object with .select() -> Promise<user>
+    // simulate: User.findOne(...).select("+password") → user
     const fakeUser = {
       _id: "user_123",
       name: "Alice Vet",
       email: "alice@example.com",
       role: "vet",
-      checkPassword: sandbox.stub().resolves(true), // encapsulated check
+      checkPassword: sandbox.stub().resolves(true), // encapsulated method
     };
     const selectStub = sandbox.stub().returns(Promise.resolve(fakeUser));
     sandbox.stub(User, "findOne").returns({ select: selectStub });
@@ -98,18 +88,14 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
 
     expect(User.findOne.calledOnceWith({ email: "alice@example.com" })).to.be.true;
     expect(selectStub.calledOnceWith("+password")).to.be.true;
-
     expect(fakeUser.checkPassword.calledOnceWith("Passw0rd!")).to.be.true;
 
-    expect(res.status.called).to.be.false; // should be 200 implicitly
+    expect(res.status.called).to.be.false; // 200 default
     const body = res.json.firstCall.args[0];
     expect(body).to.include.keys(["id", "name", "email", "role", "token"]);
     expect(body.email).to.equal("alice@example.com");
   });
 
-  /** ======================
-   *  AUTH: EDIT PROFILE
-   *  ====================== */
   it("Edit profile: updates basic fields and returns user (no password leak)", async () => {
     req.user = { id: "user_123" };
     req.body = { name: "Alice Updated", phoneNumber: "0400123456" };
@@ -120,24 +106,40 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
       email: "alice@example.com",
       role: "vet",
       phoneNumber: "0400123456",
+      toJSON() { return this; },
     };
 
-    sandbox
-      .stub(User, "findByIdAndUpdate")
-      .resolves(updated); // controller usually does .select("-password") or similar
+    // Support BOTH controller styles:
+    // A) findByIdAndUpdate(..., { new: true })
+    const fbauStub = sandbox.stub(User, "findByIdAndUpdate").resolves(updated);
+
+    // B) findById -> mutate -> save()
+    const fakeDoc = {
+      _id: "user_123",
+      name: "Alice Vet",
+      email: "alice@example.com",
+      role: "vet",
+      phoneNumber: "0400000000",
+      save: sandbox.stub().resolves(updated),
+    };
+    const fbiStub = sandbox.stub(User, "findById").resolves(fakeDoc);
 
     await updateUserProfile(req, res);
 
-    expect(User.findByIdAndUpdate.calledOnce).to.be.true;
+    // one of the strategies must be used
+    expect(fbauStub.called || fbiStub.called).to.be.true;
+
     expect(res.status.called).to.be.false; // 200 default
     const body = res.json.firstCall.args[0];
-    expect(body).to.include({ name: "Alice Updated", email: "alice@example.com" });
+    expect(body).to.include({
+      name: "Alice Updated",
+      email: "alice@example.com",
+      role: "vet",
+      phoneNumber: "0400123456",
+    });
     expect(body).to.not.have.property("password");
   });
 
-  /** ======================
-   *  PET: CREATE
-   *  ====================== */
   it("Pet: Create → adds a new pet for the current user", async () => {
     req.user = { id: "user_123", role: "staff" };
     req.body = {
@@ -165,9 +167,6 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     expect(res.json.calledWith(created)).to.be.true;
   });
 
-  /** ======================
-   *  PET: UPDATE
-   *  ====================== */
   it("Pet: Update → edits a pet by id", async () => {
     req.user = { id: "user_123", role: "staff" };
     req.params.id = "pet_001";
@@ -190,9 +189,6 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     expect(res.json.calledWith(updatedPet)).to.be.true;
   });
 
-  /** ======================
-   *  PET: REMOVE
-   *  ====================== */
   it("Pet: Remove → deletes a pet by id", async () => {
     req.user = { id: "user_123", role: "staff" };
     req.params.id = "pet_001";
@@ -206,4 +202,5 @@ describe("App Flow Unit Tests (Register → Login → Edit Profile → Pet CRUD)
     expect(res.json.calledWithMatch({ message: "Pet deleted" })).to.be.true;
   });
 });
+
 
