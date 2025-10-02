@@ -188,57 +188,63 @@ const PetProfilesStaff = () => {
       <h3 className="text-lg font-bold mt-6">Pet Profile List</h3>
       {/* updated table layout */}
       {Array.isArray(pets) && pets.length > 0 ? (
-        <table className="min-w-full border border-gray-200 text-center">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-4 py-2 border-b">Pet Name</th>
-              <th className="px-4 py-2 border-b">Species</th>
-              <th className="px-4 py-2 border-b">Age</th>
-              <th className="px-4 py-2 border-b">Allergy Med</th>
-              <th className="px-4 py-2 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pets.map((pet) => (
-              <tr key={pet._id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b font-semibold">{pet.name}</td>
-                <td className="px-4 py-2 border-b">{pet.species || "—"}</td>
-                <td className="px-4 py-2 border-b">{pet.age ?? "—"}</td>
-                <td className="px-4 py-2 border-b">
-                  {pet.allergyMed || pet.allergies || "—"}
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleEdit(pet)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(pet._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => navigate(`/appointments/pet/${pet.name}`)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      Appointments{" "}
-                    </button>
-                    <button
-                      onClick={() => navigate(`/treatments/pet/${pet.name}`)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      Treatment Records
-                    </button>
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200 text-center">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 border-b">Pet Name</th>
+                <th className="px-4 py-2 border-b">Species</th>
+                <th className="px-4 py-2 border-b">Age</th>
+                <th className="px-4 py-2 border-b">Allergy Med</th>
+                <th className="px-4 py-2 border-b">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pets.map((pet) => (
+                <tr key={pet._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b font-semibold">
+                    {pet.name}
+                  </td>
+                  <td className="px-4 py-2 border-b">{pet.species || "—"}</td>
+                  <td className="px-4 py-2 border-b">{pet.age ?? "—"}</td>
+                  <td className="px-4 py-2 border-b">
+                    {pet.allergyMed || pet.allergies || "—"}
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleEdit(pet)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-700"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(pet._id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/appointments/pet/${pet.name}`)
+                        }
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Appointments{" "}
+                      </button>
+                      <button
+                        onClick={() => navigate(`/treatments/pet/${pet.name}`)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Treatment Records
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>
           {pets.length === 0
