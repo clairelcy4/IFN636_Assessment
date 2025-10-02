@@ -7,7 +7,7 @@
 
 # testing
 /coverage
-
+/backend/mochawesome-report/
 # production
 /build
 

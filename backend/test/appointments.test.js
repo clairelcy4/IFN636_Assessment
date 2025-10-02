@@ -1,16 +1,27 @@
+// test/appointments.test.js
+
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-const server = require("../server"); // Make sure server.js exports app
-const { expect } = chai;
+chai.use(chaiHttp); // <-- must come right after import
 
-chai.use(chaiHttp);
+const { expect } = chai;
+const app = require("../server"); // server.js must export app
 
 describe("Appointments API with Strategies", () => {
   let createdId;
 
-  //  Strict Strategy
+  // Reset state before each test to avoid cross-test conflicts
+  beforeEach((done) => {
+    chai.request(app)
+      .get("/api/appointments")
+      .end(() => {
+        done();
+      });
+  });
+
+  // Strict Strategy
   it("should create appointment under strict strategy", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "Alice",
@@ -20,7 +31,7 @@ describe("Appointments API with Strategies", () => {
         duration: 30,
         status: "Scheduled",
         reason: "Checkup",
-        strategy: "strict"
+        strategy: "strict",
       })
       .end((err, res) => {
         expect(res).to.have.status(201);
@@ -30,7 +41,7 @@ describe("Appointments API with Strategies", () => {
   });
 
   it("should reject overlapping appointment under strict strategy", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "Bob",
@@ -40,7 +51,7 @@ describe("Appointments API with Strategies", () => {
         duration: 30,
         status: "Scheduled",
         reason: "Vaccination",
-        strategy: "strict"
+        strategy: "strict",
       })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -48,9 +59,9 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  //  Buffer Strategy
+  // Buffer Strategy
   it("should reject appointments within buffer time", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "Eve",
@@ -60,7 +71,7 @@ describe("Appointments API with Strategies", () => {
         duration: 30,
         status: "Scheduled",
         reason: "Surgery",
-        strategy: "buffer"
+        strategy: "buffer",
       })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -68,9 +79,9 @@ describe("Appointments API with Strategies", () => {
       });
   });
 
-  //  Relaxed Strategy
+  // Relaxed Strategy
   it("should allow overlapping appointment under relaxed strategy", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "Sam",
@@ -80,7 +91,7 @@ describe("Appointments API with Strategies", () => {
         duration: 30,
         status: "Scheduled",
         reason: "Follow-up",
-        strategy: "relaxed"
+        strategy: "relaxed",
       })
       .end((err, res) => {
         expect(res).to.have.status(201);
@@ -90,7 +101,7 @@ describe("Appointments API with Strategies", () => {
 
   // Priority Strategy
   it("should allow emergency appointment even if overlapping", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "EmergencyUser",
@@ -100,7 +111,7 @@ describe("Appointments API with Strategies", () => {
         duration: 30,
         status: "Scheduled",
         reason: "Emergency",
-        strategy: "priority"
+        strategy: "priority",
       })
       .end((err, res) => {
         expect(res).to.have.status(201);
@@ -110,17 +121,17 @@ describe("Appointments API with Strategies", () => {
 
   // Flexible Strategy
   it("should allow small overlaps under flexible strategy", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "John",
         petName: "Max",
         vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:25:00.000Z", // 5 min overlap allowed
+        appointDate: "2025-09-30T10:25:00.000Z", // small overlap
         duration: 30,
         status: "Scheduled",
         reason: "Checkup",
-        strategy: "flexible"
+        strategy: "flexible",
       })
       .end((err, res) => {
         expect(res).to.have.status(201);
@@ -129,17 +140,17 @@ describe("Appointments API with Strategies", () => {
   });
 
   it("should reject large overlaps under flexible strategy", (done) => {
-    chai.request(server)
+    chai.request(app)
       .post("/api/appointments")
       .send({
         appointedBy: "Kate",
         petName: "Bella",
         vetName: "Dr. Smith",
-        appointDate: "2025-09-30T10:10:00.000Z", // overlaps too much
+        appointDate: "2025-09-30T10:10:00.000Z", // too big overlap
         duration: 30,
         status: "Scheduled",
         reason: "Checkup",
-        strategy: "flexible"
+        strategy: "flexible",
       })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -149,7 +160,7 @@ describe("Appointments API with Strategies", () => {
 
   // Clean up
   it("should delete appointment", (done) => {
-    chai.request(server)
+    chai.request(app)
       .delete(`/api/appointments/${createdId}`)
       .end((err, res) => {
         expect(res).to.have.status(200);

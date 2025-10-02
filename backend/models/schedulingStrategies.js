@@ -87,9 +87,10 @@ class PriorityStrategy extends SchedulingStrategy {
   }
 }
 
-// Flexible = allows small overlaps (default 5 mins)
+// Flexible = allows small overlaps (default 20 mins)
+// Flexible = allows small overlaps (default 20 mins)
 class FlexibleStrategy extends SchedulingStrategy {
-  constructor(overlapMinutes = 5) {
+  constructor(overlapMinutes = 20) {  // default is now 20 minutes
     super();
     this.overlapMinutes = overlapMinutes;
   }
@@ -101,12 +102,12 @@ class FlexibleStrategy extends SchedulingStrategy {
       if (a.vetName !== newAppt.vetName) return false;
       const { start: existingStart, end: existingEnd } = this.getTimeRange(a);
 
-      const allowedOverlap = this.overlapMinutes * 60000;
+      // calculate actual overlap (in ms)
+      const overlap =
+        Math.min(newEnd, existingEnd) - Math.max(newStart, existingStart);
 
-      return (
-        newStart < existingEnd - allowedOverlap &&
-        newEnd > existingStart + allowedOverlap
-      );
+      // reject only if overlap is bigger than 20 mins
+      return overlap > this.overlapMinutes * 60000;
     });
   }
 }
