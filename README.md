@@ -1,8 +1,7 @@
 <img width="468" height="50" alt="image" src="https://github.com/user-attachments/assets/7475a4f0-7c7d-4be9-8c68-ddb9fa4d4f1e" />**IFN636 Assessment 1**
 
-Student name: Claire Lin\
+Group number: 6
 Project name: **31-Pet Clinic Management System**\
-Assignment: **Software requirements analysis and design (**Full-Stack CRUD Application Development with DevOps Practices**)**
 
 ---
 
@@ -11,19 +10,13 @@ This is the frontend for the IFN636 Assessment 1.
 Framework: React.js
 Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 
-- **Project Management with JIRA**
-- **Requirement Diagram**, **Block Definition Diagram (**BDD), Parametric Diagram using**SysML**
-- **Version Control using GitHub**
-- **CI/CD Integration for Automated Deployment**
-
 ---
 
 **Access**
 
 1. [GitHub](https://github.com/clairelcy4/IFN636_Assessment)
-2. Jira: Refer to the report uploaded on Canvas
-3. Public IP: Refer to the report uploaded on Canvas
-4. Test account: Register a new one on the website
+2. Public IP: Refer to the report uploaded on Canvas
+3. Test account: Register a new one on the website
 
 ---
 
@@ -41,11 +34,13 @@ Backend API: Node.js + Express + MongoDB (Deployed on AWS EC2)
 - root file
   npm install bcryptjs
   npm install --save-dev cross-env
+  
 - backend
   ```bash
   cd backend
   cp .env.example .env  # Add MONGO_URI, JWT_SECRET, PORT
   npm install
+  node backfillRole.js
   npm run dev
   ```
 - frontend
